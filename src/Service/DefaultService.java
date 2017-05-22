@@ -24,9 +24,11 @@ public class DefaultService {
             for (int j = 0; j < nrComponentePerProdus; j++){
                 //parcurgem componentele
                 Componenta componenta = produs.getListaComponente().get(j);
+                //componenta aceasta este in numar de stockComponente.get(componenta) in stock
                 componenteInStockPerProdus.put(componenta, stockComponente.get(componenta));
             }
-            //calculam cate produse pot fi montate cu componentele din stoc dupa numarul minim
+            //calculam cate produse pot fi montate cu componentele din stoc
+            //nr de produse va fi influentat de numarul componentelor din stock
             int nrProduseMinime = 100;
             for (Map.Entry<Componenta, Integer> nrComponenteProdus : componenteInStockPerProdus.entrySet()) {
                 if (nrComponenteProdus.getValue() < nrProduseMinime){
@@ -36,60 +38,83 @@ public class DefaultService {
             nrPieseCarePotFiMontate.put(produs, nrProduseMinime);
         }
         //Alegem Produsul cu numarul cel mai mare de piese care pot fi montate
-        int nrProduseMaxime = 0;
-        for (Map.Entry<Produs, Integer> nrMaximProduseCarePotFiCreate : nrPieseCarePotFiMontate.entrySet()) {
-            if (nrMaximProduseCarePotFiCreate.getValue() > nrProduseMaxime){
-                nrProduseMaxime = nrMaximProduseCarePotFiCreate.getValue();
-                produsFinal = nrMaximProduseCarePotFiCreate.getKey();
+        int nrPieseMaxime = 0;
+        for (Map.Entry<Produs, Integer> nrMaximPieseCarePotFiCreate : nrPieseCarePotFiMontate.entrySet()) {
+            if (nrMaximPieseCarePotFiCreate.getValue() > nrPieseMaxime){
+                nrPieseMaxime = nrMaximPieseCarePotFiCreate.getValue();
+                produsFinal = nrMaximPieseCarePotFiCreate.getKey();
             }
         }
         return produsFinal;
     }
 
-    public static void main(String[] args){
+    private static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
 
-        //Creare Obiecte
-        Componenta C1 = new Componenta(0,"C1", 10, 8);
-        Componenta C2 = new Componenta(1,"C2", 20, 8);
-        Componenta C3 = new Componenta(2,"C3", 30, 8);
-        Componenta C4 = new Componenta(2,"C4", 40, 12);
-        Componenta C5 = new Componenta(2,"C5", 50, 15);
+        Integer timpAsamblare = 0;
+        final int nrMasinarii = linieProductie.getListaMasinarii().size();
 
-        Produs P1 = new Produs(0, "P1", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}});
-        Produs P2 = new Produs(1, "P2", new ArrayList<Componenta>(){{add(C1); add(C2); add(C4); add(C5);}});
-        Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}});
+        for (Produs produs : listaProduse) {
+            for (int i = 0; i < nrMasinarii; i++){
 
-        Masinarie M1 = new Masinarie(0,"M1");
-        Masinarie M2 = new Masinarie(1,"M2");
-        Masinarie M3 = new Masinarie(2,"M3");
-        Masinarie M4 = new Masinarie(3,"M4");
+                Masinarie masinarie = linieProductie.getListaMasinarii().get(i);
 
-        LinieProductie linieProductie1 = new LinieProductie(0, new ArrayList<Masinarie>(){{add(M1); add(M2); add(M3); add(M4);}});
+                Componenta componentaMasinarie = masinarie.getComponenta();
+                for (Componenta componenta : produs.getListaComponente()){
+                    if (componenta.equals(componentaMasinarie)){
+                        Boolean seMonteazaPiesaPeMasinarieUrmatoare = false;
 
-        Map<Componenta, Integer> stockComponente = new HashMap<>();
-        stockComponente.put(C1, 50); stockComponente.put(C2, 25); stockComponente.put(C3, 50);
-        stockComponente.put(C4, 0);  stockComponente.put(C5, 0);
-
-        Fabrica F1 = new Fabrica(0,"F1", stockComponente);
-
-        //Algoritm planificare
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3);}};
-        Map<Componenta, Integer> componenteLivrate = new HashMap<>();
-        componenteLivrate.put(C4, 50); componenteLivrate.put(C5, 50);
-
-        for (int ora = 8; ora < 24; ora++) {
-
-            for (Map.Entry<Componenta, Integer> componenta : componenteLivrate.entrySet()) {
-                if (componenta.getKey().getTimpLivrare() == ora) {
-                    stockComponente.put(componenta.getKey(), componenta.getValue());
+                        for (int j = i; j < nrMasinarii; j++){
+                            Masinarie masinariaUrmatoare = linieProductie.getListaMasinarii().get(j);
+                            int timpMontareComponentaUrmatoare = masinariaUrmatoare.getComponenta().getTimpDeMontare();
+                            if (masinariaUrmatoare.getRuleaza() &&
+                                    timpMontareComponentaUrmatoare > componenta.getTimpDeMontare()){
+                                Integer timpAsamblareMasinariaUrmatoare = masinariaUrmatoare.getComponenta().getTimpDeMontare();
+                                timpAsamblare += timpAsamblareMasinariaUrmatoare;
+                                seMonteazaPiesaPeMasinarieUrmatoare = true;
+                                break;
+                            }
+                        }
+                        if (!seMonteazaPiesaPeMasinarieUrmatoare){
+                            timpAsamblare += componenta.getTimpDeMontare();
+                        }
+                    }
                 }
             }
-            Produs produs = planifica(listaProduse, stockComponente);
-            System.out.println("Produsul " + produs.getNume() + " va fi pus pe linia de productie");
-
-            for (Map.Entry<Componenta, Integer> componentaStock : stockComponente.entrySet()) {
-                System.out.println(componentaStock.getKey().getNume() + " " + componentaStock.getValue());
-            }
         }
+
+        return timpAsamblare;
+    }
+
+    public static void main(String[] args){
+
+        //Creare Obiecte id, nume, timpMontare
+        Componenta C1 = new Componenta(1,"C1", 10);
+        Componenta C2 = new Componenta(2,"C2", 20);
+        Componenta C3 = new Componenta(3,"C3", 30);
+        Componenta C4 = new Componenta(4,"C4", 40);
+        Componenta C5 = new Componenta(5,"C5", 50);
+
+        //Un produs e format din mai multe componente C1, C2 ...
+        Produs P1 = new Produs(0, "P1", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}});
+        Produs P2 = new Produs(1, "P2", new ArrayList<Componenta>(){{add(C1); add(C2); add(C4);}});
+        Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}});
+
+        // id, nume
+        // fiecare masinarie asambleaza un singur tip de componenta
+        Masinarie M1 = new Masinarie(0,"M1", C1);
+        Masinarie M2 = new Masinarie(1,"M2", C2);
+        Masinarie M3 = new Masinarie(2,"M3", C3);
+        Masinarie M4 = new Masinarie(3,"M4", C4);
+
+        //Linia de Productie contine masinariile M1, M2, M3 si M4
+        LinieProductie linieProductie = new LinieProductie(0, new ArrayList<Masinarie>(){{add(M1); add(M2); add(M3); add(M4);}});
+
+        Fabrica F1 = new Fabrica(0,"F1");
+
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3);}};
+
+        System.out.print("timp de asamblare total " + asambleaza(listaProduse, linieProductie));
+
+
     }
 }

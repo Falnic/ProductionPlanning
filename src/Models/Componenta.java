@@ -7,13 +7,11 @@ public class Componenta {
     private String nume;
     //timpul de montare e calculat in minute
     private Integer timpDeMontare;
-    private Integer timpLivrare;
 
-    public Componenta(Integer id, String nume, Integer timpDeMontare, Integer timpLivrare) {
+    public Componenta(Integer id, String nume, Integer timpDeMontare) {
         this.id = id;
         this.nume = nume;
         this.timpDeMontare = timpDeMontare;
-        this.timpLivrare = timpLivrare;
     }
 
     public Integer getId() {
@@ -38,13 +36,5 @@ public class Componenta {
 
     public void setTimpDeMontare(Integer timpDeMontare) {
         this.timpDeMontare = timpDeMontare;
-    }
-
-    public Integer getTimpLivrare() {
-        return timpLivrare;
-    }
-
-    public void setTimpLivrare(Integer timpLivrare) {
-        this.timpLivrare = timpLivrare;
     }
 }
