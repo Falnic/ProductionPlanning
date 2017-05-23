@@ -84,42 +84,68 @@ public class DefaultService {
 
     private static Integer asambleaza2(List<Produs> listaProduse, LinieProductie linieProductie){
         Map<Masinarie, Produs> masinarieProdusMap = new HashMap<>();
+        Map<Produs, Map<Componenta, Boolean>> componenteAsamblateProduse = new HashMap<>();
         List<Masinarie> masinarii = linieProductie.getListaMasinarii();
         
         Integer timpAsamblareComponente = 0;
         Integer timpAsamblare = 0;
         final int nrMasinarii = linieProductie.getListaMasinarii().size();
 
+        // Pune Primul produs pe linia de productie la masinaria dorita
         Produs primulProdus = listaProduse.get(0);
+        boolean pornesteAsamblarea = false;
         for (Masinarie masinarie : masinarii){
             Componenta componentaMasinarie = masinarie.getComponenta();
             for (Componenta componenta : primulProdus.getListaComponente()){
                 if (componenta.equals(componentaMasinarie)){
                     masinarieProdusMap.put(masinarie, primulProdus);
+
+                    Map<Componenta, Boolean> componentaMontataProdus = new HashMap<>();
+                    componentaMontataProdus.put(componenta, true);
+                    componenteAsamblateProduse.put(primulProdus, componentaMontataProdus);
+
+                    pornesteAsamblarea = true;
                     timpAsamblare += componenta.getTimpDeMontare();
                     break;
                 }
             }
+            if (pornesteAsamblarea){
+                break;
+            }
         }
         listaProduse.remove(primulProdus);
 
+        // Shiftare Produs pe linia de productie
         while (!masinarieProdusMap.isEmpty()){
             Iterator iterator = masinarieProdusMap.entrySet().iterator();
             while (iterator.hasNext()){
                 Map.Entry masinarieProdusEntry = (Map.Entry) iterator.next();
                 Produs produs = (Produs) masinarieProdusEntry.getValue();
+                pornesteAsamblarea = false;
                 for (Masinarie masinarie : masinarii){
-                    Componenta componentaMasinarie = masinarie.getComponenta();
-                    for (Componenta componenta : produs.getListaComponente()){
-                        if (componenta.equals(componentaMasinarie)
-                                && masinarii.indexOf(masinarieProdusEntry.getKey()) < masinarii.indexOf(masinarie)){
-                            masinarieProdusMap.put((Masinarie) masinarieProdusEntry.getKey(), null);
-                            masinarieProdusMap.put(masinarie, produs);
-                            timpAsamblareComponente += componenta.getTimpDeMontare();
-                            break;
+                    if (masinarii.indexOf(masinarie) > masinarii.indexOf(masinarieProdusEntry.getKey())
+                            && !pornesteAsamblarea){
+                        Componenta componentaMasinarie = masinarie.getComponenta();
+                        for (Componenta componenta : produs.getListaComponente()){
+                            if (componenta.equals(componentaMasinarie)){
+                                masinarieProdusMap.put(masinarie, produs);
+                                masinarieProdusMap.remove(masinarieProdusEntry.getKey());
+                                pornesteAsamblarea = true;
+
+                                Map<Componenta, Boolean> componentaMontataProdus = new HashMap<>();
+                                componentaMontataProdus.put(componenta, true);
+                                componenteAsamblateProduse.put(produs, componentaMontataProdus);
+
+                                timpAsamblareComponente += componenta.getTimpDeMontare();
+                                break;
+                            }
                         }
                     }
                 }
+            }
+            // Verificam daca toate componentele au fost montate pe produs
+
+        }
 //                if (!listaProduse.isEmpty()){
 //                    Produs produs = listaProduse.get(0);
 //                    for (Masinarie masinarie : masinarii){
@@ -130,8 +156,6 @@ public class DefaultService {
 //                        }
 //                    }
 //                }
-
-            }
 
 
 //            for (Produs produs : listaProduse){
@@ -152,7 +176,7 @@ public class DefaultService {
 //                }
 //                timpAsamblare += timpAsamblareComponente;
 //            }
-        }
+
 
         return timpAsamblare;
     }
