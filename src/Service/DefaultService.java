@@ -116,6 +116,7 @@ public class DefaultService {
             while (iterator.hasNext()) {
                 Map.Entry masinarieProdusEntry = (Map.Entry) iterator.next();
                 Produs produs = (Produs) masinarieProdusEntry.getValue();
+                boolean eAsamblatProdusul = true;
                 for (Masinarie masinarie : masinarii) {
                     Componenta componentaMasinarie = masinarie.getComponenta();
                     for (Componenta componenta : produs.getListaComponente()) {
@@ -125,12 +126,17 @@ public class DefaultService {
                             masinarieProdusMap.put(masinarie, produs);
                             masinarieProdusMap.remove(masinarieProdusEntry.getKey());
                             produs.setSeAsambleaza(true);
+                            eAsamblatProdusul = false;
                             timpAsamblareComponente += componenta.getTimpDeMontare();
                             break;
                         }
                     }
                 }
                 produs.setSeAsambleaza(false);
+                if (eAsamblatProdusul){
+                    masinarieProdusMap.remove(masinarieProdusEntry.getKey());
+                    timpAsamblare += timpAsamblareComponente;
+                }
             }
         }
         return timpAsamblare;
@@ -164,7 +170,7 @@ public class DefaultService {
 
         List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3);}};
 
-        System.out.print("timp de asamblare total " + asambleaza2(listaProduse, linieProductie));
+        System.out.print("\nTimp de asamblare total " + asambleaza2(listaProduse, linieProductie) + "\n");
 
 
     }
