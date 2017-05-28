@@ -8,11 +8,13 @@ public class Produs {
     private Integer id;
     private String nume;
     private List<Componenta> listaComponente;
+    private boolean seAsambleaza;
 
     public Produs(Integer id, String nume, List<Componenta> listaComponente) {
         this.id = id;
         this.nume = nume;
         this.listaComponente = listaComponente;
+        this.seAsambleaza = false;
     }
 
     public Integer getId() {
@@ -37,5 +39,13 @@ public class Produs {
 
     public void setListaComponente(List<Componenta> listaComponente) {
         this.listaComponente = listaComponente;
+    }
+
+    public Boolean getSeAsambleaza() {
+        return seAsambleaza;
+    }
+
+    public void setSeAsambleaza(Boolean seAsambleaza) {
+        this.seAsambleaza = seAsambleaza;
     }
 }

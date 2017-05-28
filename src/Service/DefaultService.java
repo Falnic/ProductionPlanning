@@ -91,69 +91,48 @@ public class DefaultService {
         final int nrMasinarii = linieProductie.getListaMasinarii().size();
 
         Produs primulProdus = listaProduse.get(0);
+        boolean seAsambleaza = false;
         for (Masinarie masinarie : masinarii){
-            Componenta componentaMasinarie = masinarie.getComponenta();
-            for (Componenta componenta : primulProdus.getListaComponente()){
-                if (componenta.equals(componentaMasinarie)){
-                    masinarieProdusMap.put(masinarie, primulProdus);
-                    timpAsamblare += componenta.getTimpDeMontare();
+            if (!masinarie.getRuleaza()){
+                Componenta componentaMasinarie = masinarie.getComponenta();
+                for (Componenta componenta : primulProdus.getListaComponente()){
+                    if (componenta.equals(componentaMasinarie)){
+                        masinarieProdusMap.put(masinarie, primulProdus);
+                        masinarie.setRuleaza(true);
+                        seAsambleaza = true;
+                        timpAsamblare += componenta.getTimpDeMontare();
+                        break;
+                    }
+                }
+                if (seAsambleaza){
                     break;
                 }
             }
         }
         listaProduse.remove(primulProdus);
 
-        while (!masinarieProdusMap.isEmpty()){
+        while (!masinarieProdusMap.isEmpty()) {
             Iterator iterator = masinarieProdusMap.entrySet().iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Map.Entry masinarieProdusEntry = (Map.Entry) iterator.next();
                 Produs produs = (Produs) masinarieProdusEntry.getValue();
-                for (Masinarie masinarie : masinarii){
+                for (Masinarie masinarie : masinarii) {
                     Componenta componentaMasinarie = masinarie.getComponenta();
-                    for (Componenta componenta : produs.getListaComponente()){
+                    for (Componenta componenta : produs.getListaComponente()) {
                         if (componenta.equals(componentaMasinarie)
-                                && masinarii.indexOf(masinarieProdusEntry.getKey()) < masinarii.indexOf(masinarie)){
-                            masinarieProdusMap.put((Masinarie) masinarieProdusEntry.getKey(), null);
+                                && masinarii.indexOf(masinarieProdusEntry.getKey()) < masinarii.indexOf(masinarie)
+                                && !produs.getSeAsambleaza()){
                             masinarieProdusMap.put(masinarie, produs);
+                            masinarieProdusMap.remove(masinarieProdusEntry.getKey());
+                            produs.setSeAsambleaza(true);
                             timpAsamblareComponente += componenta.getTimpDeMontare();
                             break;
                         }
                     }
                 }
-//                if (!listaProduse.isEmpty()){
-//                    Produs produs = listaProduse.get(0);
-//                    for (Masinarie masinarie : masinarii){
-//                        Componenta componentaMasinarie = masinarie.getComponenta();
-//                        for (Componenta componenta : produs.getListaComponente()){
-//                            if (componenta.equals(componentaMasinarie)
-//                                    && !masinarieProdusMap.containsKey(masinarie))
-//                        }
-//                    }
-//                }
-
+                produs.setSeAsambleaza(false);
             }
-
-
-//            for (Produs produs : listaProduse){
-//                for (Masinarie masinarie : masinarii){
-//                    Componenta componentaMasinarie = masinarie.getComponenta();
-//                    for (Componenta componenta : produs.getListaComponente()){
-//                        if (componenta.equals(componentaMasinarie)){
-//                            for (Masinarie keyMasinarie : masinarieProdusMap.keySet()) {
-//                                if (masinarii.indexOf(masinarie) < masinarii.indexOf(keyMasinarie)){
-//
-//                                }
-//                                masinarieProdusMap.put(masinarie, produs);
-//                            }
-//                            timpAsamblareComponente += componenta.getTimpDeMontare();
-//                            break;
-//                        }
-//                    }
-//                }
-//                timpAsamblare += timpAsamblareComponente;
-//            }
         }
-
         return timpAsamblare;
     }
 
