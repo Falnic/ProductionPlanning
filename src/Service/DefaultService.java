@@ -82,6 +82,16 @@ public class DefaultService {
         return timpAsamblare;
     }
 
+    private static Integer calculeazaTimpAsamblare(List<Masinarie> masinarii, Masinarie masinarie){
+        for (int i = masinarii.indexOf(masinarie) + 1; i < masinarii.size(); i++){
+            if (masinarii.get(i).getRuleaza()
+                    && masinarie.getComponenta().getTimpDeMontare() < masinarii.get(i).getComponenta().getTimpDeMontare()){
+                return masinarii.get(i).getComponenta().getTimpDeMontare();
+            }
+        }
+        return masinarie.getComponenta().getTimpDeMontare();
+    }
+
     private static boolean verificaMasinariiLinie(Map<Produs, Masinarie> tempProdusMasinarieLinkedHashMap, List<Masinarie> masinarii, Masinarie masinarie, Produs produs){
 
         boolean linieOcupata = false;
@@ -182,7 +192,7 @@ public class DefaultService {
                                 componenteAsamblateProdus.put(produs, produs.getComponenteAsamblate());
 
                                 produs.setSeAsambleaza(true);
-                                produs.setTimpAsamblare(produs.getTimpAsamblare() + componenta.getTimpDeMontare());
+                                produs.setTimpAsamblare(produs.getTimpAsamblare() + calculeazaTimpAsamblare(masinarii, masinarie));
                                 break;
                             }
                         }
