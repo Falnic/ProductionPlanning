@@ -8,13 +8,17 @@ public class Produs {
     private Integer id;
     private String nume;
     private List<Componenta> listaComponente;
+    private List<Componenta> componenteAsamblate;
     private boolean seAsambleaza;
+    private Integer timpAsamblare;
 
-    public Produs(Integer id, String nume, List<Componenta> listaComponente) {
+    public Produs(Integer id, String nume, List<Componenta> listaComponente, List<Componenta> componenteAsamblate) {
         this.id = id;
         this.nume = nume;
         this.listaComponente = listaComponente;
+        this.componenteAsamblate = componenteAsamblate;
         this.seAsambleaza = false;
+        this.timpAsamblare = 0;
     }
 
     public Integer getId() {
@@ -41,11 +45,27 @@ public class Produs {
         this.listaComponente = listaComponente;
     }
 
-    public Boolean getSeAsambleaza() {
+    public boolean isSeAsambleaza() {
         return seAsambleaza;
     }
 
-    public void setSeAsambleaza(Boolean seAsambleaza) {
+    public void setSeAsambleaza(boolean seAsambleaza) {
         this.seAsambleaza = seAsambleaza;
+    }
+
+    public Integer getTimpAsamblare() {
+        return timpAsamblare;
+    }
+
+    public void setTimpAsamblare(Integer timpAsamblare) {
+        this.timpAsamblare = timpAsamblare;
+    }
+
+    public List<Componenta> getComponenteAsamblate() {
+        return componenteAsamblate;
+    }
+
+    public void setComponenteAsamblate(List<Componenta> componenteAsamblate) {
+        this.componenteAsamblate = componenteAsamblate;
     }
 }
