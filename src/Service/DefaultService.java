@@ -82,102 +82,128 @@ public class DefaultService {
         return timpAsamblare;
     }
 
-    private static Integer asambleaza2(List<Produs> listaProduse, LinieProductie linieProductie){
-        Map<Masinarie, Produs> masinarieProdusMap = new HashMap<>();
-        Map<Produs, Map<Componenta, Boolean>> componenteAsamblateProduse = new HashMap<>();
-        List<Masinarie> masinarii = linieProductie.getListaMasinarii();
-        
-        Integer timpAsamblareComponente = 0;
-        Integer timpAsamblare = 0;
-        final int nrMasinarii = linieProductie.getListaMasinarii().size();
+    private static Integer calculeazaTimpAsamblare(List<Masinarie> masinarii, Masinarie masinarie){
+        for (int i = masinarii.indexOf(masinarie) + 1; i < masinarii.size(); i++){
+            if (masinarii.get(i).getRuleaza()
+                    && masinarie.getComponenta().getTimpDeMontare() < masinarii.get(i).getComponenta().getTimpDeMontare()){
+                return masinarii.get(i).getComponenta().getTimpDeMontare();
+            }
+        }
+        return masinarie.getComponenta().getTimpDeMontare();
+    }
 
-        // Pune Primul produs pe linia de productie la masinaria dorita
+    private static boolean verificaMasinariiLinie(Map<Produs, Masinarie> tempProdusMasinarieLinkedHashMap, List<Masinarie> masinarii, Masinarie masinarie, Produs produs){
+
+        boolean linieOcupata = false;
+        Iterator iteratorProduseLinieProductie = tempProdusMasinarieLinkedHashMap.entrySet().iterator();
+        while (iteratorProduseLinieProductie.hasNext()){
+            Map.Entry masinarieProdusEntryVerificare = (Map.Entry) iteratorProduseLinieProductie.next();
+            Masinarie masinarieLinie = (Masinarie) masinarieProdusEntryVerificare.getValue();
+
+            if (masinarii.indexOf(masinarieLinie) >= 0
+                    && !masinarieProdusEntryVerificare.getKey().equals(produs)
+                    && masinarii.indexOf(masinarieLinie) < masinarii.indexOf(masinarie)){
+                linieOcupata = true;
+                break;
+            }
+        }
+
+        return linieOcupata;
+    }
+
+    private static Integer asambleaza2(List<Produs> listaProduse, LinieProductie linieProductie){
+        Map<Produs, Masinarie> linkedMapMasinarieProdus = new LinkedHashMap<Produs, Masinarie>();
+        Map<Produs, List<Componenta>> componenteAsamblateProdus = new HashMap<Produs, List<Componenta>>();
+
+        List<Masinarie> masinarii = linieProductie.getListaMasinarii();
+
+        Integer timpAsamblare = 0;
+
         Produs primulProdus = listaProduse.get(0);
-        boolean pornesteAsamblarea = false;
         for (Masinarie masinarie : masinarii){
             Componenta componentaMasinarie = masinarie.getComponenta();
             for (Componenta componenta : primulProdus.getListaComponente()){
                 if (componenta.equals(componentaMasinarie)){
-                    masinarieProdusMap.put(masinarie, primulProdus);
+                    primulProdus.setTimpAsamblare(primulProdus.getTimpAsamblare() + componenta.getTimpDeMontare());
+                    masinarie.setRuleaza(true);
+                    primulProdus.setSeAsambleaza(true);
+                    primulProdus.getComponenteAsamblate().add(componenta);
 
-                    Map<Componenta, Boolean> componentaMontataProdus = new HashMap<>();
-                    componentaMontataProdus.put(componenta, true);
-                    componenteAsamblateProduse.put(primulProdus, componentaMontataProdus);
+                    List<Componenta> componenteAsamblate = new ArrayList<>();
+                    componenteAsamblate.add(componenta);
+                    componenteAsamblateProdus.put(primulProdus, componenteAsamblate);
 
-                    pornesteAsamblarea = true;
-                    timpAsamblare += componenta.getTimpDeMontare();
                     break;
                 }
             }
-            if (pornesteAsamblarea){
+            if (primulProdus.isSeAsambleaza()){
+                primulProdus.setSeAsambleaza(false);
+
+                linkedMapMasinarieProdus.put(primulProdus, masinarie);
                 break;
             }
         }
         listaProduse.remove(primulProdus);
 
-        // Shiftare Produs pe linia de productie
-        while (!masinarieProdusMap.isEmpty()){
-            Iterator iterator = masinarieProdusMap.entrySet().iterator();
-            while (iterator.hasNext()){
+        Masinarie masinarieIdle = new Masinarie(0, "Masinarie IDLE", null);
+
+        while (!linkedMapMasinarieProdus.isEmpty()) {
+
+            if (!listaProduse.isEmpty()){
+                Produs produs = listaProduse.get(0);
+                listaProduse.remove(produs);
+
+                linkedMapMasinarieProdus.put(produs, masinarieIdle);
+            }
+
+            Map<Produs, Masinarie> tempProdusMasinarieLinkedHashMap = new LinkedHashMap<>();
+            tempProdusMasinarieLinkedHashMap.putAll(linkedMapMasinarieProdus);
+            int i = -1;
+            Iterator iterator = linkedMapMasinarieProdus.entrySet().iterator();
+            while (iterator.hasNext()) {
                 Map.Entry masinarieProdusEntry = (Map.Entry) iterator.next();
-                Produs produs = (Produs) masinarieProdusEntry.getValue();
-                pornesteAsamblarea = false;
-                for (Masinarie masinarie : masinarii){
-                    if (masinarii.indexOf(masinarie) > masinarii.indexOf(masinarieProdusEntry.getKey())
-                            && !pornesteAsamblarea){
+                Produs produs = (Produs) masinarieProdusEntry.getKey();
+                if (componenteAsamblateProdus.get(produs) != null
+                        && componenteAsamblateProdus.get(produs).containsAll(produs.getListaComponente())){
+                    timpAsamblare += ((Produs) masinarieProdusEntry.getKey()).getTimpAsamblare();
+                    ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
+                    tempProdusMasinarieLinkedHashMap.remove(masinarieProdusEntry.getKey());
+                    continue;
+                }
+                i++;
+                for (Masinarie masinarie : masinarii) {
+                    boolean linieOcupata = false;
+                    if (i != 0){
+                        linieOcupata = verificaMasinariiLinie(tempProdusMasinarieLinkedHashMap, linieProductie.getListaMasinarii(), masinarie, produs);
+                    }
+
+                    if (!produs.isSeAsambleaza() && !linieOcupata){
                         Componenta componentaMasinarie = masinarie.getComponenta();
-                        for (Componenta componenta : produs.getListaComponente()){
-                            if (componenta.equals(componentaMasinarie)){
-                                masinarieProdusMap.put(masinarie, produs);
-                                masinarieProdusMap.remove(masinarieProdusEntry.getKey());
-                                pornesteAsamblarea = true;
+                        for (Componenta componenta : produs.getListaComponente()) {
+                            if (componenta.equals(componentaMasinarie)
+                                    && masinarii.indexOf(masinarieProdusEntry.getValue()) < masinarii.indexOf(masinarie)
+                                    && !masinarie.getRuleaza()) {
 
-                                Map<Componenta, Boolean> componentaMontataProdus = new HashMap<>();
-                                componentaMontataProdus.put(componenta, true);
-                                componenteAsamblateProduse.put(produs, componentaMontataProdus);
+                                ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
+                                masinarie.setRuleaza(true);
+                                tempProdusMasinarieLinkedHashMap.replace(produs, (Masinarie) masinarieProdusEntry.getValue(), masinarie);
 
-                                timpAsamblareComponente += componenta.getTimpDeMontare();
+                                produs.getComponenteAsamblate().add(componenta);
+                                componenteAsamblateProdus.put(produs, produs.getComponenteAsamblate());
+
+                                produs.setSeAsambleaza(true);
+                                produs.setTimpAsamblare(produs.getTimpAsamblare() + calculeazaTimpAsamblare(masinarii, masinarie));
                                 break;
                             }
                         }
                     }
                 }
+                produs.setSeAsambleaza(false);
             }
-            // Verificam daca toate componentele au fost montate pe produs
 
+            linkedMapMasinarieProdus.clear();
+            linkedMapMasinarieProdus.putAll(tempProdusMasinarieLinkedHashMap);
         }
-//                if (!listaProduse.isEmpty()){
-//                    Produs produs = listaProduse.get(0);
-//                    for (Masinarie masinarie : masinarii){
-//                        Componenta componentaMasinarie = masinarie.getComponenta();
-//                        for (Componenta componenta : produs.getListaComponente()){
-//                            if (componenta.equals(componentaMasinarie)
-//                                    && !masinarieProdusMap.containsKey(masinarie))
-//                        }
-//                    }
-//                }
-
-
-//            for (Produs produs : listaProduse){
-//                for (Masinarie masinarie : masinarii){
-//                    Componenta componentaMasinarie = masinarie.getComponenta();
-//                    for (Componenta componenta : produs.getListaComponente()){
-//                        if (componenta.equals(componentaMasinarie)){
-//                            for (Masinarie keyMasinarie : masinarieProdusMap.keySet()) {
-//                                if (masinarii.indexOf(masinarie) < masinarii.indexOf(keyMasinarie)){
-//
-//                                }
-//                                masinarieProdusMap.put(masinarie, produs);
-//                            }
-//                            timpAsamblareComponente += componenta.getTimpDeMontare();
-//                            break;
-//                        }
-//                    }
-//                }
-//                timpAsamblare += timpAsamblareComponente;
-//            }
-
-
         return timpAsamblare;
     }
 
@@ -191,16 +217,16 @@ public class DefaultService {
         Componenta C5 = new Componenta(5,"C5", 50);
 
         //Un produs e format din mai multe componente C1, C2 ...
-        Produs P1 = new Produs(0, "P1", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}});
-        Produs P2 = new Produs(1, "P2", new ArrayList<Componenta>(){{add(C1); add(C2); add(C4);}});
-        Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}});
+        Produs P1 = new Produs(0, "P1", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}}, new ArrayList<Componenta>());
+        Produs P2 = new Produs(1, "P2", new ArrayList<Componenta>(){{add(C1); add(C2); add(C4);}}, new ArrayList<Componenta>());
+        Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}}, new ArrayList<Componenta>());
 
         // id, nume
         // fiecare masinarie asambleaza un singur tip de componenta
-        Masinarie M1 = new Masinarie(0,"M1", C1);
-        Masinarie M2 = new Masinarie(1,"M2", C2);
-        Masinarie M3 = new Masinarie(2,"M3", C3);
-        Masinarie M4 = new Masinarie(3,"M4", C4);
+        Masinarie M1 = new Masinarie(1,"M1", C1);
+        Masinarie M2 = new Masinarie(2,"M2", C2);
+        Masinarie M3 = new Masinarie(3,"M3", C3);
+        Masinarie M4 = new Masinarie(4,"M4", C4);
 
         //Linia de Productie contine masinariile M1, M2, M3 si M4
         LinieProductie linieProductie = new LinieProductie(0, new ArrayList<Masinarie>(){{add(M1); add(M2); add(M3); add(M4);}});
@@ -209,7 +235,7 @@ public class DefaultService {
 
         List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3);}};
 
-        System.out.print("timp de asamblare total " + asambleaza2(listaProduse, linieProductie));
+        System.out.print("\nTimp de asamblare total " + asambleaza2(listaProduse, linieProductie) + "\n");
 
 
     }
