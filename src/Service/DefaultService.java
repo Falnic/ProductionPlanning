@@ -91,6 +91,8 @@ public class DefaultService {
                         && componenteAsamblateProdus.get(produs).containsAll(produs.getListaComponente())){
                     timpAsamblare += ((Produs) masinarieProdusEntry.getKey()).getTimpAsamblare();
                     ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
+                    ((Produs) masinarieProdusEntry.getKey()).setTimpAsamblare(0);
+                    ((Produs) masinarieProdusEntry.getKey()).setComponenteAsamblate(new ArrayList<Componenta>());
                     tempProdusMasinarieLinkedHashMap.remove(masinarieProdusEntry.getKey());
                     continue;
                 }
@@ -185,14 +187,15 @@ public class DefaultService {
         List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); }};
 
         for (List<Produs> produsList : permuta(listaProduse)){
+            System.out.println();
             for (Produs produs : produsList){
                 System.out.print(produs.getNume() + " ");
             }
-            System.out.println();
+            System.out.println("\nTimp de asamblare permutare " +asambleaza(produsList, linieProductie));
         }
 
         // Metoda asambleaza are cateva bug-uri. Acestea se vor rezolva in viitor
-        System.out.print("\nTimp de asamblare total " + asambleaza(listaProduse, linieProductie) + "\n");
+//        System.out.print("\nTimp de asamblare total " + asambleaza(listaProduse, linieProductie) + "\n");
 
 
     }
