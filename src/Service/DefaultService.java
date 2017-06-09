@@ -140,10 +140,10 @@ public class DefaultService {
 
         Produs produs = listaProduse.get(0);
         for (List<Produs> permutare : permuta(listaProduse.subList(1, listaProduse.size()))){
-            for (int i = 0; i <= listaProduse.size(); i++){
-                List permutareNoua = Arrays.asList(listaProduse.subList(0, i));
+            for (int i = 0; i <= permutare.size(); i++){
+                List<Produs> permutareNoua = new ArrayList<>(permutare.subList(0, i));
                 permutareNoua.add(produs);
-                permutareNoua.addAll(i + 1, listaProduse.subList(i + 1, listaProduse.size()));
+                permutareNoua.addAll(i + 1, permutare.subList(i, permutare.size()));
 
                 permutari.add(permutareNoua);
             }
@@ -182,7 +182,7 @@ public class DefaultService {
 
         final Fabrica F1 = new Fabrica(0,"F1");
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); }};
 
         for (List<Produs> produsList : permuta(listaProduse)){
             for (Produs produs : produsList){
