@@ -35,7 +35,7 @@ public class DefaultService {
         return linieOcupata;
     }
 
-    private static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
+    public static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
         Map<Produs, Masinarie> linkedMapMasinarieProdus = new LinkedHashMap<Produs, Masinarie>();
         Map<Produs, List<Componenta>> componenteAsamblateProdus = new HashMap<Produs, List<Componenta>>();
 
@@ -166,11 +166,16 @@ public class DefaultService {
         //Un produs e format din mai multe componente C1, C2 ...
         final Produs P1 = new Produs(0, "P1", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}}, new ArrayList<Componenta>());
         final Produs P2 = new Produs(1, "P2", new ArrayList<Componenta>(){{add(C1); add(C2); add(C4);}}, new ArrayList<Componenta>());
-        final Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}}, new ArrayList<Componenta>());
+        final Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(C1); add(C2); add(C5);}}, new ArrayList<Componenta>());
 
+        final Produs P4 = new Produs(3, "P4", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}}, new ArrayList<Componenta>());
+        final Produs P5 = new Produs(4, "P5", new ArrayList<Componenta>(){{add(C2); add(C3); add(C5);}}, new ArrayList<Componenta>());
+        final Produs P6 = new Produs(5, "P6", new ArrayList<Componenta>(){{add(C2); add(C3); add(C1);}}, new ArrayList<Componenta>());
 
-        final Produs P11 = new Produs(0, "P11", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}}, new ArrayList<Componenta>());
-        final Produs P12 = new Produs(0, "P12", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}}, new ArrayList<Componenta>());
+        final Produs P7 = new Produs(6, "P7", new ArrayList<Componenta>(){{add(C3); add(C4); add(C5);}}, new ArrayList<Componenta>());
+        final Produs P8 = new Produs(7, "P8", new ArrayList<Componenta>(){{add(C3); add(C2); add(C1);}}, new ArrayList<Componenta>());
+        final Produs P9 = new Produs(8, "P9", new ArrayList<Componenta>(){{add(C1); add(C5); add(C2);}}, new ArrayList<Componenta>());
+        final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(C5); add(C3); add(C1);}}, new ArrayList<Componenta>());
 
         // id, nume
         // fiecare masinarie asambleaza un singur tip de componenta
@@ -184,19 +189,23 @@ public class DefaultService {
 
         final Fabrica F1 = new Fabrica(0,"F1");
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); }};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
+                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-        for (List<Produs> produsList : permuta(listaProduse)){
-            System.out.println();
-            for (Produs produs : produsList){
+//        List<List<Produs>> listaPermutari = new ArrayList<>();
+//        listaPermutari.addAll(permuta(listaProduse));
+
+//        for (List<Produs> produsList : listaPermutari){
+//            System.out.println();
+//            for (Produs produs : produsList){
+//                System.out.print(produs.getNume() + " ");
+//            }
+//            System.out.println("\nTimp de asamblare permutare " +asambleaza(produsList, linieProductie));
+//        }
+        List<Produs> permutareFinala = RandomPermutationsGeneratorService.genereazaPermutareaRandomMinima(10, listaProduse, linieProductie);
+        for (Produs produs : permutareFinala){
                 System.out.print(produs.getNume() + " ");
             }
-            System.out.println("\nTimp de asamblare permutare " +asambleaza(produsList, linieProductie));
-        }
-
-        // Metoda asambleaza are cateva bug-uri. Acestea se vor rezolva in viitor
-//        System.out.print("\nTimp de asamblare total " + asambleaza(listaProduse, linieProductie) + "\n");
-
-
+        System.out.println("Timpul minim de asamblare =" + RandomPermutationsGeneratorService.timpAsamblareMinim);
     }
 }
