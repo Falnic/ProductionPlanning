@@ -29,7 +29,7 @@ public class RandomPermutationsGeneratorService {
             }
             int timpAsamblare = DefaultService.asambleaza(permutare, linieProductie);
             if (timpAsamblareMinim > timpAsamblare){
-                permutareFinala = permutare;
+                permutareFinala.addAll(permutare);
                 timpAsamblareMinim = timpAsamblare;
             }
         }
