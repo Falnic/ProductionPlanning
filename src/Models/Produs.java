@@ -11,6 +11,7 @@ public class Produs {
     private List<Componenta> componenteAsamblate;
     private boolean seAsambleaza;
     private Integer timpAsamblare;
+    private Integer timpIntrareLinie;
 
     public Produs(Integer id, String nume, List<Componenta> listaComponente, List<Componenta> componenteAsamblate) {
         this.id = id;
@@ -67,5 +68,13 @@ public class Produs {
 
     public void setComponenteAsamblate(List<Componenta> componenteAsamblate) {
         this.componenteAsamblate = componenteAsamblate;
+    }
+
+    public Integer getTimpIntrareLinie() {
+        return timpIntrareLinie;
+    }
+
+    public void setTimpIntrareLinie(Integer timpIntrareLinie) {
+        this.timpIntrareLinie = timpIntrareLinie;
     }
 }
