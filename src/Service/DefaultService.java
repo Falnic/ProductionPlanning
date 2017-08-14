@@ -1,10 +1,14 @@
 package Service;
 
 import Models.*;
+import PSO.PSOProcesare;
 
 import java.util.*;
 
 public class DefaultService {
+
+    public static List<Componenta> listaComponente;
+    public static LinieProductie linieProductie;
 
     private static Integer calculeazaTimpAsamblare(List<Masinarie> masinarii, Masinarie masinarie){
         for (int i = masinarii.indexOf(masinarie) + 1; i < masinarii.size(); i++){
@@ -204,18 +208,29 @@ public class DefaultService {
         final Produs P9 = new Produs(8, "P9", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(1));}}, new ArrayList<>());
         final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(listaComponente.get(3)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
-                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
+//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
+//                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);}};
 
         return listaProduse;
     }
 
     public static void main(String[] args){
-        List<Componenta> listaComponente = generareListaComponente();
+        listaComponente = generareListaComponente();
+        linieProductie = generareLinieProductie(listaComponente);
 
-        System.out.println("Timpul minim de asamblare =" + asambleaza(generareListaProduse(listaComponente), generareLinieProductie(listaComponente)));
+        PSOProcesare psoProcesare = new PSOProcesare();
+        psoProcesare.initializareRoi(generareListaProduse(listaComponente));
 
+        for (int i = 0; i < psoProcesare.roi.size(); i++){
+            System.out.println(psoProcesare.roi.get(i) + " ");
+            for (int j = 0; j < psoProcesare.roi.get(i).getLocatie().size(); j++){
+                System.out.print(psoProcesare.roi.get(i).getLocatie().get(j) + " ");
+            }
+            System.out.println();
+        }
+
+        //System.out.println("Timpul minim de asamblare =" + asambleaza(generareListaProduse(listaComponente), generareLinieProductie(listaComponente)));
     }
 }

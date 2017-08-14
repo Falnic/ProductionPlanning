@@ -6,15 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Particula {
-    private double valoareFitness;
+    private Integer valoareFitness;
+    private List<Integer> locatie = new ArrayList<>();
     private List<Produs> permutare = new ArrayList<>();
 
     public Particula(){
         super();
     }
 
-    public Particula(double valoareFitness, List<Produs> permutare) {
+    public Particula(Integer valoareFitness, List<Integer> locatie, List<Produs> permutare) {
         this.valoareFitness = valoareFitness;
+        this.locatie = locatie;
         this.permutare = permutare;
     }
 
@@ -22,8 +24,16 @@ public class Particula {
         return valoareFitness;
     }
 
-    public void setValoareFitness(double valoareFitness) {
+    public void setValoareFitness(Integer valoareFitness) {
         this.valoareFitness = valoareFitness;
+    }
+
+    public List<Integer> getLocatie() {
+        return locatie;
+    }
+
+    public void setLocatie(List<Integer> locatie) {
+        this.locatie = locatie;
     }
 
     public List<Produs> getPermutare() {

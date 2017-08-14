@@ -1,6 +1,7 @@
 package PSO;
 
 import Models.Produs;
+import Service.DefaultService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,25 +9,26 @@ import java.util.Random;
 import java.util.Vector;
 
 import static PSO.PSOConstants.*;
+import static Service.DefaultService.asambleaza;
 
 public class PSOProcesare {
     private double[] listaValoriFitness = new double[DIMENSIUNE_ROI];
-    private Vector<Particula> roi = new Vector<>();
+    public Vector<Particula> roi = new Vector<>();
     private double[] pBest = new double[DIMENSIUNE_ROI];
-    private Vector<List<Produs>> pBestLocation = new Vector<List<Produs>>();
+    private Vector<List<Produs>> pBestLocation = new Vector<>();
     private double gBest;
     private List<Produs> gBestLocation;
 
     Random produsAleator = new Random();
 
 
-    public void executa(List<Produs> listaTotalaProduse){
+    /*public void executa(List<Produs> listaTotalaProduse){
         initializareRoi(listaTotalaProduse);
         updateListaFitness();
 
         for (int i = 0; i < DIMENSIUNE_ROI; i++){
             pBest[i] = listaValoriFitness[i];
-            pBestLocation.add(roi.get(i).getPermutare());
+            pBestLocation.add(roi.get(i).getLocatie());
         }
 
         int iteratie = 0;
@@ -37,7 +39,7 @@ public class PSOProcesare {
             for(int i = 0; i < DIMENSIUNE_ROI; i++) {
                 if(listaValoriFitness[i] < pBest[i]) {
                     pBest[i] = listaValoriFitness[i];
-                    pBestLocation.set(i, roi.get(i).getPermutare());
+                    pBestLocation.set(i, roi.get(i).getLocatie());
                 }
             }
 
@@ -45,7 +47,7 @@ public class PSOProcesare {
             int bestParticleIndex = PSOUtilitati.getMinPos(listaValoriFitness);
             if(iteratie == 0 || listaValoriFitness[bestParticleIndex] < gBest) {
                 gBest = listaValoriFitness[bestParticleIndex];
-                gBestLocation = roi.get(bestParticleIndex).getPermutare();
+                gBestLocation = roi.get(bestParticleIndex).getLocatie();
             }
 
             // velocity function at bottom
@@ -53,18 +55,32 @@ public class PSOProcesare {
         }
 
 
-    }
+    }*/
 
     public void initializareRoi(List<Produs> listaTotalaProduse){
         for (int i = 0; i < DIMENSIUNE_ROI; i++){
             Particula particula = new Particula();
+            List<Produs> copieListaTotalaProduse = new ArrayList<>();
+            copieListaTotalaProduse.addAll(listaTotalaProduse);
 
-            List<Produs> permutare = new ArrayList<>(DIMENSIUNEA_PROBLEMEI);
-            for (int j = 0; j < DIMENSIUNEA_PROBLEMEI; j++){
-                Produs produs = listaTotalaProduse.get(produsAleator.nextInt(DIMENSIUNEA_PROBLEMEI));
+            List<Produs> permutare = new ArrayList<>(listaTotalaProduse.size());
+            while (!copieListaTotalaProduse.isEmpty()){
+                Produs produs = copieListaTotalaProduse.get(produsAleator.nextInt(copieListaTotalaProduse.size()));
+                copieListaTotalaProduse.remove(produs);
                 permutare.add(produs);
             }
+            particula.setValoareFitness(asambleaza(permutare, DefaultService.linieProductie));
             particula.setPermutare(permutare);
+
+            List<Integer> X = new ArrayList<>();
+            for (Produs produs : permutare){
+                if (produs.getTimpIntrareLinie() != null){
+                    X.add(produs.getTimpIntrareLinie());
+                } else {
+                    X.add(0);
+                }
+            }
+            particula.setLocatie(X);
             roi.add(particula);
         }
     }
