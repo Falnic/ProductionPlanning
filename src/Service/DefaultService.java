@@ -36,27 +36,28 @@ public class DefaultService {
     }
 
     public static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
-        Map<Produs, Masinarie> linkedMapMasinarieProdus = new LinkedHashMap<Produs, Masinarie>();
-        Map<Produs, List<Componenta>> componenteAsamblateProdus = new HashMap<Produs, List<Componenta>>();
+        // linkedMapMasinarieProdus este harta cu produsele asignate fiecarei masinarii
+        Map<Produs, Masinarie> produseAsignateLaMasinarie = new LinkedHashMap<>();
+        Map<Produs, List<Componenta>> componenteAsamblateProdus = new HashMap<>();
 
         List<Masinarie> masinarii = linieProductie.getListaMasinarii();
-
         Integer timpAsamblare = 0;
+
         List<Produs> copieListaProduse = new ArrayList<>();
         copieListaProduse.addAll(listaProduse);
 
         Produs primulProdus = copieListaProduse.get(0);
         for (Masinarie masinarie : masinarii){
             Componenta componentaMasinarie = masinarie.getComponenta();
-            for (Componenta componenta : primulProdus.getListaComponente()){
-                if (componenta.equals(componentaMasinarie)){
-                    primulProdus.setTimpAsamblare(primulProdus.getTimpAsamblare() + componenta.getTimpDeMontare());
+            for (Componenta componentaProdus : primulProdus.getListaComponente()){
+                if (componentaProdus.equals(componentaMasinarie)){
+                    primulProdus.setTimpAsamblare(primulProdus.getTimpAsamblare() + componentaProdus.getTimpDeMontare());
                     masinarie.setRuleaza(true);
                     primulProdus.setSeAsambleaza(true);
-                    primulProdus.getComponenteAsamblate().add(componenta);
+                    primulProdus.getComponenteAsamblate().add(componentaProdus);
 
                     List<Componenta> componenteAsamblate = new ArrayList<>();
-                    componenteAsamblate.add(componenta);
+                    componenteAsamblate.add(componentaProdus);
                     componenteAsamblateProdus.put(primulProdus, componenteAsamblate);
 
                     break;
@@ -65,7 +66,7 @@ public class DefaultService {
             if (primulProdus.isSeAsambleaza()){
                 primulProdus.setSeAsambleaza(false);
 
-                linkedMapMasinarieProdus.put(primulProdus, masinarie);
+                produseAsignateLaMasinarie.put(primulProdus, masinarie);
                 break;
             }
         }
@@ -73,19 +74,25 @@ public class DefaultService {
 
         Masinarie masinarieIdle = new Masinarie(0, "Masinarie IDLE", null);
 
-        while (!linkedMapMasinarieProdus.isEmpty()) {
+        while (!produseAsignateLaMasinarie.isEmpty()) {
 
             if (!copieListaProduse.isEmpty()){
                 Produs produs = copieListaProduse.get(0);
                 copieListaProduse.remove(produs);
 
-                linkedMapMasinarieProdus.put(produs, masinarieIdle);
+                Iterator iterator = produseAsignateLaMasinarie.keySet().iterator();
+                Produs ultimulPropusAsignatLaMasinarie = (Produs) iterator.next();
+
+                produs.setTimpIntrareLinie(ultimulPropusAsignatLaMasinarie.getTimpAsamblare());
+
+                produseAsignateLaMasinarie.put(produs, masinarieIdle);
             }
 
-            Map<Produs, Masinarie> tempProdusMasinarieLinkedHashMap = new LinkedHashMap<>();
-            tempProdusMasinarieLinkedHashMap.putAll(linkedMapMasinarieProdus);
+            Map<Produs, Masinarie> copieProduseAsignateLaMasinarie = new LinkedHashMap<>();
+            copieProduseAsignateLaMasinarie.putAll(produseAsignateLaMasinarie);
+
             int i = -1;
-            Iterator iterator = linkedMapMasinarieProdus.entrySet().iterator();
+            Iterator iterator = produseAsignateLaMasinarie.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry masinarieProdusEntry = (Map.Entry) iterator.next();
                 Produs produs = (Produs) masinarieProdusEntry.getKey();
@@ -94,15 +101,15 @@ public class DefaultService {
                     timpAsamblare += ((Produs) masinarieProdusEntry.getKey()).getTimpAsamblare();
                     ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
                     ((Produs) masinarieProdusEntry.getKey()).setTimpAsamblare(0);
-                    ((Produs) masinarieProdusEntry.getKey()).setComponenteAsamblate(new ArrayList<Componenta>());
-                    tempProdusMasinarieLinkedHashMap.remove(masinarieProdusEntry.getKey());
+                    ((Produs) masinarieProdusEntry.getKey()).setComponenteAsamblate(new ArrayList<>());
+                    copieProduseAsignateLaMasinarie.remove(masinarieProdusEntry.getKey());
                     continue;
                 }
                 i++;
                 for (Masinarie masinarie : masinarii) {
                     boolean linieOcupata = false;
                     if (i != 0){
-                        linieOcupata = verificaMasinariiLinie(tempProdusMasinarieLinkedHashMap, linieProductie.getListaMasinarii(), masinarie, produs);
+                        linieOcupata = verificaMasinariiLinie(copieProduseAsignateLaMasinarie, linieProductie.getListaMasinarii(), masinarie, produs);
                     }
 
                     if (!produs.isSeAsambleaza() && !linieOcupata){
@@ -114,7 +121,7 @@ public class DefaultService {
 
                                 ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
                                 masinarie.setRuleaza(true);
-                                tempProdusMasinarieLinkedHashMap.replace(produs, (Masinarie) masinarieProdusEntry.getValue(), masinarie);
+                                copieProduseAsignateLaMasinarie.replace(produs, (Masinarie) masinarieProdusEntry.getValue(), masinarie);
 
                                 produs.getComponenteAsamblate().add(componenta);
                                 componenteAsamblateProdus.put(produs, produs.getComponenteAsamblate());
@@ -129,8 +136,8 @@ public class DefaultService {
                 produs.setSeAsambleaza(false);
             }
 
-            linkedMapMasinarieProdus.clear();
-            linkedMapMasinarieProdus.putAll(tempProdusMasinarieLinkedHashMap);
+            produseAsignateLaMasinarie.clear();
+            produseAsignateLaMasinarie.putAll(copieProduseAsignateLaMasinarie);
         }
         return timpAsamblare;
     }
@@ -156,59 +163,59 @@ public class DefaultService {
         return permutari;
     }
 
-    public static void main(String[] args){
-
+    public static List<Componenta> generareListaComponente(){
         //Creare Obiecte id, nume, timpMontare
         final Componenta C1 = new Componenta(1,"C1", 10);
         final Componenta C2 = new Componenta(2,"C2", 20);
         final Componenta C3 = new Componenta(3,"C3", 30);
         final Componenta C4 = new Componenta(4,"C4", 40);
-        final Componenta C5 = new Componenta(5,"C5", 50);
+//        final Componenta C5 = new Componenta(5,"C5", 50);
+        
+        return Arrays.asList(C1, C2, C3, C4);
+    }
 
-        //Un produs e format din mai multe componente C1, C2 ...
-        final Produs P1 = new Produs(1, "P1", new ArrayList<Componenta>(){{add(C1); add(C2); add(C3);}}, new ArrayList<Componenta>());
-        final Produs P2 = new Produs(2, "P2", new ArrayList<Componenta>(){{add(C1); add(C2); add(C4);}}, new ArrayList<Componenta>());
-        final Produs P3 = new Produs(3, "P3", new ArrayList<Componenta>(){{add(C2); add(C3); add(C4);}}, new ArrayList<Componenta>());
-
-        final Produs P4 = new Produs(4, "P4", new ArrayList<Componenta>(){{add(C2); add(C3); add(C1);}}, new ArrayList<Componenta>());
-        final Produs P5 = new Produs(5, "P5", new ArrayList<Componenta>(){{add(C3); add(C2); add(C1);}}, new ArrayList<Componenta>());
-        final Produs P6 = new Produs(6, "P6", new ArrayList<Componenta>(){{add(C2); add(C4); add(C1);}}, new ArrayList<Componenta>());
-
-        final Produs P7 = new Produs(7, "P7", new ArrayList<Componenta>(){{add(C3); add(C4); add(C1);}}, new ArrayList<Componenta>());
-        final Produs P8 = new Produs(8, "P8", new ArrayList<Componenta>(){{add(C3); add(C1); add(C1);}}, new ArrayList<Componenta>());
-        final Produs P9 = new Produs(9, "P9", new ArrayList<Componenta>(){{add(C1); add(C2); add(C2);}}, new ArrayList<Componenta>());
-        final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(C3); add(C3); add(C2);}}, new ArrayList<Componenta>());
-
+    public static LinieProductie generareLinieProductie(List<Componenta> listaComponente){
         // id, nume
         // fiecare masinarie asambleaza un singur tip de componenta
-        final Masinarie M1 = new Masinarie(1,"M1", C1);
-        final Masinarie M2 = new Masinarie(2,"M2", C2);
-        final Masinarie M3 = new Masinarie(3,"M3", C3);
-        final Masinarie M4 = new Masinarie(4,"M4", C4);
+        final Masinarie M1 = new Masinarie(1,"M1", listaComponente.get(0));
+        final Masinarie M2 = new Masinarie(2,"M2", listaComponente.get(1));
+        final Masinarie M3 = new Masinarie(3,"M3", listaComponente.get(2));
+        final Masinarie M4 = new Masinarie(4,"M4", listaComponente.get(3));
 
         //Linia de Productie contine masinariile M1, M2, M3 si M4
         final LinieProductie linieProductie = new LinieProductie(0, new ArrayList<Masinarie>(){{add(M1); add(M2); add(M3); add(M4);}});
 
-        final Fabrica F1 = new Fabrica(0,"F1");
+        return linieProductie;
+    }
+
+    public static List<Produs> generareListaProduse(List<Componenta> listaComponente){
+        
+        //Un produs e format din mai multe componente C1, C2 ...
+        final Produs P1 = new Produs(0, "P1", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(2));}}, new ArrayList<>());
+        final Produs P2 = new Produs(1, "P2", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(3));}}, new ArrayList<>());
+        final Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(1));}}, new ArrayList<>());
+
+        final Produs P4 = new Produs(3, "P4", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(3));}}, new ArrayList<>());
+        final Produs P5 = new Produs(4, "P5", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
+        final Produs P6 = new Produs(5, "P6", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
+
+        final Produs P7 = new Produs(6, "P7", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(3)); add(listaComponente.get(0));}}, new ArrayList<>());
+        final Produs P8 = new Produs(7, "P8", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(1)); add(listaComponente.get(0));}}, new ArrayList<>());
+        final Produs P9 = new Produs(8, "P9", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(1));}}, new ArrayList<>());
+        final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(listaComponente.get(3)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
 
         List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
                                                              add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-//        List<List<Produs>> listaPermutari = new ArrayList<>();
-//        listaPermutari.addAll(permuta(listaProduse));
+//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);}};
 
-//        for (List<Produs> produsList : listaPermutari){
-//            System.out.println();
-//            for (Produs produs : produsList){
-//                System.out.print(produs.getNume() + " ");
-//            }
-//            System.out.println("\nTimp de asamblare permutare " +asambleaza(produsList, linieProductie));
-//        }
-        List<Produs> permutareFinala = RandomPermutationsGeneratorService.genereazaPermutareaRandomMinima(10, listaProduse, linieProductie);
-        System.out.println();
-        for (Produs produs : permutareFinala){
-                System.out.print(produs.getNume() + " ");
-            }
-        System.out.println("Timpul minim de asamblare = " + RandomPermutationsGeneratorService.timpAsamblareMinim);
+        return listaProduse;
+    }
+
+    public static void main(String[] args){
+        List<Componenta> listaComponente = generareListaComponente();
+
+        System.out.println("Timpul minim de asamblare =" + asambleaza(generareListaProduse(listaComponente), generareLinieProductie(listaComponente)));
+
     }
 }
