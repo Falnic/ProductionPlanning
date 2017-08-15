@@ -70,7 +70,7 @@ public class PSOProcesare {
                 // (constrangeri incalcate, timp de asamblare pentru fiecare particula)
                 // (1,100) < (2,10)
                 // (1,100) > (1,10)
-                
+
 //                newVel[0] = (w * p.getVelocity().getPos()[0]) +
 //                        (r1 * C1) * (pBestLocation.get(i).getLoc()[0] - p.getLocation().getLoc()[0]) +
 //                        (r2 * C2) * (gBestLocation.getLoc()[0] - p.getLocation().getLoc()[0]);
