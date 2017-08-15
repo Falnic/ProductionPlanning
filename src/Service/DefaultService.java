@@ -224,7 +224,11 @@ public class DefaultService {
         psoProcesare.initializareRoi(generareListaProduse(listaComponente));
 
         for (int i = 0; i < psoProcesare.roi.size(); i++){
-            System.out.println(psoProcesare.roi.get(i) + " ");
+            for (int j = 0; j < psoProcesare.roi.get(i).getLocatie().size(); j++){
+                System.out.print(psoProcesare.roi.get(i).getPermutare().get(j).getNume() + " ");
+            }
+            System.out.print(psoProcesare.roi.get(i).getValoareFitness() + " ");
+            System.out.println();
             for (int j = 0; j < psoProcesare.roi.get(i).getLocatie().size(); j++){
                 System.out.print(psoProcesare.roi.get(i).getLocatie().get(j) + " ");
             }

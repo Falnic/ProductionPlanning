@@ -1,17 +1,19 @@
 package PSO;
 
-public class PSOUtilitati {
-    public static int getMinPos(double[] list) {
-        int pos = 0;
-        double minValue = list[0];
+import java.util.List;
 
-        for(int i=0; i<list.length; i++) {
-            if(list[i] < minValue) {
-                pos = i;
-                minValue = list[i];
+public class PSOUtilitati {
+    public static Particula getParticulaCuFitnessMinim(List<Particula> roi) {
+
+        int valoareMinima = roi.get(0).getCelMaiBunFitness();
+        Particula particulaGBest = roi.get(0);
+
+        for (Particula particula : roi){
+            if (particula.getCelMaiBunFitness() < valoareMinima){
+                valoareMinima = particula.getCelMaiBunFitness();
+                particulaGBest = particula;
             }
         }
-
-        return pos;
+        return particulaGBest;
     }
 }
