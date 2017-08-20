@@ -3,19 +3,17 @@ package PSO;
 import Models.Produs;
 import Service.DefaultService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import static PSO.PSOConstants.*;
 import static Service.DefaultService.asambleaza;
 import static Service.DefaultService.linieProductie;
 
 public class PSOProcesare {
+    public static int constrangeriIncalcate = 0;
+
     public List<Particula> roi = new ArrayList<>();
     // pBest = lista valori fitness
-    private int[] pBest = new int[DIMENSIUNE_ROI];
     private List<List<Integer>> pBestLocation = new ArrayList<>();
     private int gBest;
     private List<Integer> gBestLocation;
@@ -55,21 +53,37 @@ public class PSOProcesare {
                 gBestLocation = particulaCuFitnessMinim.getLocatie();
             }
 
-            for (Particula particula : roi){
+            for (Particula particula : roi) {
                 // Pasul 3 -  Calculeaza viteza noua a particulei
                 List<Integer> vitezaNoua = new ArrayList<>();
-                for (int j = 0; j < particula.getLocatie().size(); j++){
+                for (int j = 0; j < particula.getLocatie().size(); j++) {
                     int x1 = particula.getCeaMaiBunaSolutie().get(j);
                     int x2 = particula.getLocatie().get(j);
                     vitezaNoua.add(Math.abs(x1 - x2));
                 }
                 particula.setViteza(vitezaNoua);
-                // Pasul 4 - Schimba pozitia particulei (Schimba valoarea permutarii)
-                // Pasul 5 - Evalueaza daca noua particula este corecta
-                // Pasul 6 - Genereaza o structura asemanatoare cu o tupla care sa contina
-                // (constrangeri incalcate, timp de asamblare pentru fiecare particula)
-                // (1,100) < (2,10)
-                // (1,100) > (1,10)
+
+                // Pasul 4 - Evalueaza daca noua locatie a particulei este corecta
+                List<Produs> pozitieNoua = new ArrayList<>();
+                pozitieNoua = schimbaPozitie(particula);
+
+                int fitnessNou = asambleaza(pozitieNoua, linieProductie);
+                if (particula.getCelMaiBunFitness() < fitnessNou){
+                    constrangeriIncalcate++;
+                } else {
+                    // Pasul 5 - Schimba pozitia particulei (Schimba valoarea permutarii)
+                    particula.setPermutare(pozitieNoua);
+                }
+
+            }
+
+        }
+    }
+
+            // Pasul 6 - Genereaza o structura asemanatoare cu o tupla care sa contina
+            // (constrangeri incalcate, timp de asamblare pentru fiecare particula)
+            // (1,100) < (2,10)
+            // (1,100) > (1,10)
 
 //                newVel[0] = (w * p.getVelocity().getPos()[0]) +
 //                        (r1 * C1) * (pBestLocation.get(i).getLoc()[0] - p.getLocation().getLoc()[0]) +
@@ -98,9 +112,23 @@ public class PSOProcesare {
 //
 //            t++;
 //            updateFitnessList();
-            }
 
+    public List<Produs> schimbaPozitie(Particula particula){
+        List<Produs> pozitie = new ArrayList<>();
+
+        for (int i = 0; i < particula.getViteza().size(); i++){
+            Integer vitezaMinima = Integer.MAX_VALUE;
+            Integer indiceVitezaMinima = Integer.MAX_VALUE;
+            for (int j = 0; j < particula.getViteza().size(); j++){
+                if (vitezaMinima > particula.getViteza().get(j)){
+                    vitezaMinima = particula.getViteza().get(j);
+                    indiceVitezaMinima = j;
+                }
+            }
+            pozitie.add(particula.getPermutare().get(indiceVitezaMinima));
         }
+        return pozitie;
+
     }
 
     public void initializareRoi(List<Produs> listaTotalaProduse){
@@ -135,6 +163,3 @@ public class PSOProcesare {
         }
     }
 }
-
-//            w = W_UPPERBOUND - (((double) t) / MAX_ITERATION) * (W_UPPERBOUND - W_LOWERBOUND);
-//

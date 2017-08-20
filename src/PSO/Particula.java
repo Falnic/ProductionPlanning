@@ -11,6 +11,8 @@ public class Particula {
     private Integer valoareFitness;
     // p-fitness
     private Integer celMaiBunFitness;
+    // X-vector e format din timpul de asamblare al fiecarui produs
+    // ex: index-ul 0 al listei e reprezentat de timpul de asamblare al produsului P0
     // X-vector in cazul nostru
     private List<Integer> locatie = new ArrayList<>();
     // P-vector
