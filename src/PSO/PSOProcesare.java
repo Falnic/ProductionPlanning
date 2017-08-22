@@ -1,91 +1,90 @@
 package PSO;
 
 import Models.Produs;
+import Service.DefaultService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import static PSO.PSOConstants.*;
+import static Service.DefaultService.asambleaza;
+import static Service.DefaultService.linieProductie;
 
 public class PSOProcesare {
-    private double[] listaValoriFitness = new double[DIMENSIUNE_ROI];
-    private Vector<Particula> roi = new Vector<>();
-    private double[] pBest = new double[DIMENSIUNE_ROI];
-    private Vector<List<Produs>> pBestLocation = new Vector<List<Produs>>();
-    private double gBest;
-    private List<Produs> gBestLocation;
+    public static int constrangeriIncalcate = 0;
+
+    public List<Particula> roi = new ArrayList<>();
+    // pBest = lista valori fitness
+    private List<List<Integer>> pBestLocation = new ArrayList<>();
+    private int gBest;
+    private List<Integer> gBestLocation;
 
     Random produsAleator = new Random();
 
 
     public void executa(List<Produs> listaTotalaProduse){
+        /*For each particle
+              Initialize particle
+          END*/
         initializareRoi(listaTotalaProduse);
-        updateListaFitness();
-
-        for (int i = 0; i < DIMENSIUNE_ROI; i++){
-            pBest[i] = listaValoriFitness[i];
-            pBestLocation.add(roi.get(i).getPermutare());
-        }
-
         int iteratie = 0;
-        double w;
 
         while(iteratie < ITERATII_MAXIME) {
-            // step 1 - update pBest
-            for(int i = 0; i < DIMENSIUNE_ROI; i++) {
-                if(listaValoriFitness[i] < pBest[i]) {
-                    pBest[i] = listaValoriFitness[i];
-                    pBestLocation.set(i, roi.get(i).getPermutare());
+
+            // Pasul 1
+
+            // Pentru fiecare particula
+            // Calculeaza valoare fitness
+            for (Particula particula : roi) {
+                particula.setValoareFitness(asambleaza(particula.getPermutare(), linieProductie));
+
+                // If the fitness value is better than the best fitness value (pBest) in history
+                // set current value as the new pBest
+                if (particula.getValoareFitness() < particula.getCelMaiBunFitness()) {
+                    particula.setCelMaiBunFitness(particula.getValoareFitness());
+                    particula.setCeaMaiBunaSolutie(particula.getLocatie());
                 }
             }
 
-            // step 2 - update gBest
-            int bestParticleIndex = PSOUtilitati.getMinPos(listaValoriFitness);
-            if(iteratie == 0 || listaValoriFitness[bestParticleIndex] < gBest) {
-                gBest = listaValoriFitness[bestParticleIndex];
-                gBestLocation = roi.get(bestParticleIndex).getPermutare();
+            // Pasul 2 - update gBest
+            // Choose the particle with the best fitness value of all the particles as the gBest
+            Particula particulaCuFitnessMinim = PSOUtilitati.getParticulaCuFitnessMinim(roi);
+            if (iteratie == 0 || particulaCuFitnessMinim.getCelMaiBunFitness() < gBest) {
+                gBest = particulaCuFitnessMinim.getCelMaiBunFitness();
+                gBestLocation = particulaCuFitnessMinim.getLocatie();
             }
 
-            // velocity function at bottom
+            for (Particula particula : roi) {
+                // Pasul 3 -  Calculeaza viteza noua a particulei
+                List<Integer> vitezaNoua = new ArrayList<>();
+                for (int j = 0; j < particula.getLocatie().size(); j++) {
+                    int x1 = particula.getCeaMaiBunaSolutie().get(j);
+                    int x2 = particula.getLocatie().get(j);
+                    vitezaNoua.add(Math.abs(x1 - x2));
+                }
+                particula.setViteza(vitezaNoua);
 
-        }
+                // Pasul 4 - Evalueaza daca noua locatie a particulei este corecta
+                List<Produs> pozitieNoua = new ArrayList<>();
+                pozitieNoua = schimbaPozitie(particula);
 
+                int fitnessNou = asambleaza(pozitieNoua, linieProductie);
+                if (particula.getCelMaiBunFitness() < fitnessNou){
+                    constrangeriIncalcate++;
+                } else {
+                    // Pasul 5 - Schimba pozitia particulei (Schimba valoarea permutarii)
+                    particula.setPermutare(pozitieNoua);
+                }
 
-    }
-
-    public void initializareRoi(List<Produs> listaTotalaProduse){
-        for (int i = 0; i < DIMENSIUNE_ROI; i++){
-            Particula particula = new Particula();
-
-            List<Produs> permutare = new ArrayList<>(DIMENSIUNEA_PROBLEMEI);
-            for (int j = 0; j < DIMENSIUNEA_PROBLEMEI; j++){
-                Produs produs = listaTotalaProduse.get(produsAleator.nextInt(DIMENSIUNEA_PROBLEMEI));
-                permutare.add(produs);
             }
-            particula.setPermutare(permutare);
-            roi.add(particula);
+
         }
     }
 
-    public void updateListaFitness() {
-        for(int i = 0; i < DIMENSIUNE_ROI; i++) {
-            listaValoriFitness[i] = roi.get(i).getValoareFitness();
-        }
-    }
-}
+            // Pasul 6 - Genereaza o structura asemanatoare cu o tupla care sa contina
+            // (constrangeri incalcate, timp de asamblare pentru fiecare particula)
+            // (1,100) < (2,10)
+            // (1,100) > (1,10)
 
-//            w = W_UPPERBOUND - (((double) t) / MAX_ITERATION) * (W_UPPERBOUND - W_LOWERBOUND);
-//
-//            for(int i=0; i<SWARM_SIZE; i++) {
-//                double r1 = generator.nextDouble();
-//                double r2 = generator.nextDouble();
-//
-//                Particle p = swarm.get(i);
-//
-//                // step 3 - update velocity
-//                double[] newVel = new double[PROBLEM_DIMENSION];
 //                newVel[0] = (w * p.getVelocity().getPos()[0]) +
 //                        (r1 * C1) * (pBestLocation.get(i).getLoc()[0] - p.getLocation().getLoc()[0]) +
 //                        (r2 * C2) * (gBestLocation.getLoc()[0] - p.getLocation().getLoc()[0]);
@@ -113,3 +112,54 @@ public class PSOProcesare {
 //
 //            t++;
 //            updateFitnessList();
+
+    public List<Produs> schimbaPozitie(Particula particula){
+        List<Produs> pozitie = new ArrayList<>();
+
+        for (int i = 0; i < particula.getViteza().size(); i++){
+            Integer vitezaMinima = Integer.MAX_VALUE;
+            Integer indiceVitezaMinima = Integer.MAX_VALUE;
+            for (int j = 0; j < particula.getViteza().size(); j++){
+                if (vitezaMinima > particula.getViteza().get(j)){
+                    vitezaMinima = particula.getViteza().get(j);
+                    indiceVitezaMinima = j;
+                }
+            }
+            pozitie.add(particula.getPermutare().get(indiceVitezaMinima));
+        }
+        return pozitie;
+
+    }
+
+    public void initializareRoi(List<Produs> listaTotalaProduse){
+        for (int i = 0; i < DIMENSIUNE_ROI; i++){
+            Particula particula = new Particula();
+            List<Produs> copieListaTotalaProduse = new ArrayList<>();
+            copieListaTotalaProduse.addAll(listaTotalaProduse);
+
+            List<Produs> permutare = new ArrayList<>(listaTotalaProduse.size());
+            while (!copieListaTotalaProduse.isEmpty()){
+                Produs produs = copieListaTotalaProduse.get(produsAleator.nextInt(copieListaTotalaProduse.size()));
+                copieListaTotalaProduse.remove(produs);
+                permutare.add(produs);
+            }
+            particula.setValoareFitness(asambleaza(permutare, DefaultService.linieProductie));
+            particula.setPermutare(permutare);
+
+            List<Integer> X = new ArrayList<>();
+            for (Produs produs : permutare){
+                if (produs.getTimpIntrareLinie() != null){
+                    X.add(produs.getTimpIntrareLinie());
+                } else {
+                    X.add(0);
+                }
+            }
+            particula.setLocatie(X);
+            // initializam cel mai bun fitness cu prima valoarea fitness
+            particula.setCelMaiBunFitness(particula.getValoareFitness());
+            // initializam cea mai buna solutie cu prima locatie
+            particula.setCeaMaiBunaSolutie(particula.getLocatie());
+            roi.add(particula);
+        }
+    }
+}

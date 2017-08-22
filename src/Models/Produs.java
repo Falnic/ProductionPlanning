@@ -13,6 +13,10 @@ public class Produs {
     private Integer timpAsamblare;
     private Integer timpIntrareLinie;
 
+    public Produs(){
+        super();
+    }
+
     public Produs(Integer id, String nume, List<Componenta> listaComponente, List<Componenta> componenteAsamblate) {
         this.id = id;
         this.nume = nume;
@@ -76,5 +80,18 @@ public class Produs {
 
     public void setTimpIntrareLinie(Integer timpIntrareLinie) {
         this.timpIntrareLinie = timpIntrareLinie;
+    }
+
+    public Produs setAtributeProdus(Produs produs){
+        Produs produsFinal = new Produs();
+
+        produsFinal.setId(produs.getId());
+        produsFinal.setNume(produs.getNume());
+        produsFinal.setListaComponente(produs.getListaComponente());
+        produsFinal.setComponenteAsamblate(produs.getComponenteAsamblate());
+        produsFinal.setTimpAsamblare(produs.getTimpAsamblare());
+        produsFinal.setTimpIntrareLinie(produs.getTimpIntrareLinie());
+
+        return produsFinal;
     }
 }
