@@ -1,13 +1,15 @@
-package Service;
+package Start;
 
 import Models.*;
 import PSO.PSOProcesare;
+import PSO.Particula;
 
 import java.util.*;
 
-public class DefaultService {
+public class Main {
 
     public static List<Componenta> listaComponente;
+    public static List<Produs> listaProduse;
     public static LinieProductie linieProductie;
 
     private static Integer calculeazaTimpAsamblare(List<Masinarie> masinarii, Masinarie masinarie){
@@ -211,30 +213,24 @@ public class DefaultService {
 //        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
 //                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
+                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
         return listaProduse;
     }
 
     public static void main(String[] args){
         listaComponente = generareListaComponente();
+        listaProduse = generareListaProduse(listaComponente);
         linieProductie = generareLinieProductie(listaComponente);
 
         PSOProcesare psoProcesare = new PSOProcesare();
-        psoProcesare.initializareRoi(generareListaProduse(listaComponente));
-
-        for (int i = 0; i < psoProcesare.roi.size(); i++){
-            for (int j = 0; j < psoProcesare.roi.get(i).getLocatie().size(); j++){
-                System.out.print(psoProcesare.roi.get(i).getPermutare().get(j).getNume() + " ");
-            }
-            System.out.print(psoProcesare.roi.get(i).getValoareFitness() + " ");
-            System.out.println();
-            for (int j = 0; j < psoProcesare.roi.get(i).getLocatie().size(); j++){
-                System.out.print(psoProcesare.roi.get(i).getLocatie().get(j) + " ");
-            }
-            System.out.println();
+        Particula particula = psoProcesare.executa(listaProduse);
+        System.out.println("Cea mai buna solutie este");
+        for (int i = 0; i < particula.getPermutare().size(); i++){
+                System.out.print(particula.getPermutare().get(i).getNume() + " ");
         }
-
-        //System.out.println("Timpul minim de asamblare =" + asambleaza(generareListaProduse(listaComponente), generareLinieProductie(listaComponente)));
+        System.out.println();
+        System.out.println("Timpul de asamblare minim este " + particula.getCelMaiBunFitness());
     }
 }

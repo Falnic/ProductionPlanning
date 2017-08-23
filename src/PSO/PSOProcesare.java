@@ -1,27 +1,25 @@
 package PSO;
 
 import Models.Produs;
-import Service.DefaultService;
 
 import java.util.*;
 
 import static PSO.PSOConstants.*;
-import static Service.DefaultService.asambleaza;
-import static Service.DefaultService.linieProductie;
+import static PSO.PSOUtilitati.calculeazaLocatie;
+import static Start.Main.asambleaza;
+import static Start.Main.linieProductie;
 
 public class PSOProcesare {
-    public static int constrangeriIncalcate = 0;
 
-    public List<Particula> roi = new ArrayList<>();
-    // pBest = lista valori fitness
-    private List<List<Integer>> pBestLocation = new ArrayList<>();
+    private List<Particula> roi = new ArrayList<>();
     private int gBest;
+    private Particula gBestParticle;
     private List<Integer> gBestLocation;
 
-    Random produsAleator = new Random();
+    private Random produsAleator = new Random();
 
 
-    public void executa(List<Produs> listaTotalaProduse){
+    public Particula executa(List<Produs> listaTotalaProduse){
         /*For each particle
               Initialize particle
           END*/
@@ -50,69 +48,44 @@ public class PSOProcesare {
             Particula particulaCuFitnessMinim = PSOUtilitati.getParticulaCuFitnessMinim(roi);
             if (iteratie == 0 || particulaCuFitnessMinim.getCelMaiBunFitness() < gBest) {
                 gBest = particulaCuFitnessMinim.getCelMaiBunFitness();
+                gBestParticle = particulaCuFitnessMinim;
                 gBestLocation = particulaCuFitnessMinim.getLocatie();
             }
 
+            // We implement a different algorithm when we are at the first iteration
             for (Particula particula : roi) {
                 // Pasul 3 -  Calculeaza viteza noua a particulei
-                List<Integer> vitezaNoua = new ArrayList<>();
-                for (int j = 0; j < particula.getLocatie().size(); j++) {
-                    int x1 = particula.getCeaMaiBunaSolutie().get(j);
-                    int x2 = particula.getLocatie().get(j);
-                    vitezaNoua.add(Math.abs(x1 - x2));
+                List<Integer> vitezaNoua;
+                if (iteratie != 0){
+                    vitezaNoua = calculeazaViteza(particula, particula.getLocatie());
+                } else {
+                    vitezaNoua = calculeazaViteza(particula, gBestLocation);
                 }
                 particula.setViteza(vitezaNoua);
 
-                // Pasul 4 - Evalueaza daca noua locatie a particulei este corecta
-                List<Produs> pozitieNoua = new ArrayList<>();
+                List<Produs> pozitieNoua;
                 pozitieNoua = schimbaPozitie(particula);
-
                 int fitnessNou = asambleaza(pozitieNoua, linieProductie);
-                if (particula.getCelMaiBunFitness() < fitnessNou){
-                    constrangeriIncalcate++;
-                } else {
-                    // Pasul 5 - Schimba pozitia particulei (Schimba valoarea permutarii)
+
+                // Pasul 4 - Schimba pozitia particulei (Schimba valoarea permutarii)
+                if (particula.getCelMaiBunFitness() > fitnessNou){
                     particula.setPermutare(pozitieNoua);
+                    particula.setLocatie(calculeazaLocatie(pozitieNoua));
                 }
-
             }
-
+            iteratie++;
         }
+        return gBestParticle;
     }
-
-            // Pasul 6 - Genereaza o structura asemanatoare cu o tupla care sa contina
-            // (constrangeri incalcate, timp de asamblare pentru fiecare particula)
-            // (1,100) < (2,10)
-            // (1,100) > (1,10)
-
-//                newVel[0] = (w * p.getVelocity().getPos()[0]) +
-//                        (r1 * C1) * (pBestLocation.get(i).getLoc()[0] - p.getLocation().getLoc()[0]) +
-//                        (r2 * C2) * (gBestLocation.getLoc()[0] - p.getLocation().getLoc()[0]);
-//                newVel[1] = (w * p.getVelocity().getPos()[1]) +
-//                        (r1 * C1) * (pBestLocation.get(i).getLoc()[1] - p.getLocation().getLoc()[1]) +
-//                        (r2 * C2) * (gBestLocation.getLoc()[1] - p.getLocation().getLoc()[1]);
-//                Velocity vel = new Velocity(newVel);
-//                p.setVelocity(vel);
-//
-//                // step 4 - update location
-//                double[] newLoc = new double[PROBLEM_DIMENSION];
-//                newLoc[0] = p.getLocation().getLoc()[0] + newVel[0];
-//                newLoc[1] = p.getLocation().getLoc()[1] + newVel[1];
-//                Location loc = new Location(newLoc);
-//                p.setLocation(loc);
-//            }
-//
-//            err = ProblemSet.evaluate(gBestLocation) - 0; // minimizing the functions means it's getting closer to 0
-//
-//
-//            System.out.println("ITERATION " + t + ": ");
-//            System.out.println("     Best X: " + gBestLocation.getLoc()[0]);
-//            System.out.println("     Best Y: " + gBestLocation.getLoc()[1]);
-//            System.out.println("     Value: " + ProblemSet.evaluate(gBestLocation));
-//
-//            t++;
-//            updateFitnessList();
-
+    public List<Integer> calculeazaViteza(Particula particula, List<Integer> locatie){
+        List<Integer> vitezaNoua = new ArrayList<>();
+        for (int j = 0; j < particula.getLocatie().size(); j++) {
+            int x1 = particula.getCeaMaiBunaSolutie().get(j);
+            int x2 = locatie.get(j);
+            vitezaNoua.add(Math.abs(x1 - x2));
+        }
+        return vitezaNoua;
+    }
     public List<Produs> schimbaPozitie(Particula particula){
         List<Produs> pozitie = new ArrayList<>();
 
@@ -120,7 +93,8 @@ public class PSOProcesare {
             Integer vitezaMinima = Integer.MAX_VALUE;
             Integer indiceVitezaMinima = Integer.MAX_VALUE;
             for (int j = 0; j < particula.getViteza().size(); j++){
-                if (vitezaMinima > particula.getViteza().get(j)){
+                if (vitezaMinima > particula.getViteza().get(j)
+                        && !pozitie.contains(particula.getPermutare().get(j))){
                     vitezaMinima = particula.getViteza().get(j);
                     indiceVitezaMinima = j;
                 }
@@ -143,18 +117,10 @@ public class PSOProcesare {
                 copieListaTotalaProduse.remove(produs);
                 permutare.add(produs);
             }
-            particula.setValoareFitness(asambleaza(permutare, DefaultService.linieProductie));
+            particula.setValoareFitness(asambleaza(permutare, linieProductie));
             particula.setPermutare(permutare);
 
-            List<Integer> X = new ArrayList<>();
-            for (Produs produs : permutare){
-                if (produs.getTimpIntrareLinie() != null){
-                    X.add(produs.getTimpIntrareLinie());
-                } else {
-                    X.add(0);
-                }
-            }
-            particula.setLocatie(X);
+            particula.setLocatie(calculeazaLocatie(permutare));
             // initializam cel mai bun fitness cu prima valoarea fitness
             particula.setCelMaiBunFitness(particula.getValoareFitness());
             // initializam cea mai buna solutie cu prima locatie
