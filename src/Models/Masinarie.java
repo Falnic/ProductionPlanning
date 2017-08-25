@@ -39,7 +39,7 @@ public class Masinarie {
         this.componenta = componenta;
     }
 
-    public Boolean getRuleaza() {
+    public Boolean isRuleaza() {
         return ruleaza;
     }
 
