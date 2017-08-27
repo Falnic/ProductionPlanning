@@ -1,6 +1,8 @@
 package Start;
 
 import Models.*;
+import PSO.PSOProcesare;
+import PSO.Particula;
 
 import java.util.*;
 
@@ -40,7 +42,7 @@ public class Main {
         return linieOcupata;
     }
 
-    public static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
+    public static Integer asambleaza2(List<Produs> listaProduse, LinieProductie linieProductie){
         // linkedMapMasinarieProdus este harta cu produsele asignate fiecarei masinarii
         Map<Produs, Masinarie> produseAsignateLaMasinarie = new LinkedHashMap<>();
         Map<Produs, List<Componenta>> componenteAsamblateProdus = new HashMap<>();
@@ -147,7 +149,7 @@ public class Main {
         return timpAsamblare;
     }
 
-    public static Integer asambleaza2(List<Produs> listaProduse, LinieProductie linieProductie){
+    public static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
 
         List<IteratieLinieAsamblare> linieAsamblare = initializareLinieAsamblare();
         List<Masinarie> masinarii = linieProductie.getListaMasinarii();
@@ -252,10 +254,7 @@ public class Main {
         final Produs P3 = new Produs(2, "P3", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(4));}}, new ArrayList<>());
         final Produs P4 = new Produs(3, "P4", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(3));}}, new ArrayList<>());
         final Produs P5 = new Produs(4, "P5", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(4));}}, new ArrayList<>());
-
-//        final Produs P4 = new Produs(3, "P4", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(3));}}, new ArrayList<>());
-//        final Produs P5 = new Produs(4, "P5", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
-//        final Produs P6 = new Produs(5, "P6", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
+        final Produs P6 = new Produs(5, "P6", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(3)); add(listaComponente.get(4));}}, new ArrayList<>());
 //
 //        final Produs P7 = new Produs(6, "P7", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(3)); add(listaComponente.get(0));}}, new ArrayList<>());
 //        final Produs P8 = new Produs(7, "P8", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(1)); add(listaComponente.get(0));}}, new ArrayList<>());
@@ -265,7 +264,7 @@ public class Main {
 //        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
 //                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5); add(P6);}};
 
         return listaProduse;
     }
@@ -276,18 +275,18 @@ public class Main {
         listaProduse = generareListaProduse(listaComponente);
         linieProductie = generareLinieProductie(listaComponente);
 
-/*        PSOProcesare psoProcesare = new PSOProcesare();
+        PSOProcesare psoProcesare = new PSOProcesare();
         Particula particula = psoProcesare.executa(listaProduse);
         System.out.println("Cea mai buna solutie este");
         for (int i = 0; i < particula.getPermutare().size(); i++){
                 System.out.print(particula.getPermutare().get(i).getNume() + " ");
         }
         System.out.println();
-        System.out.println("Timpul de asamblare minim este " + particula.getCelMaiBunFitness());*/
+        System.out.println("Timpul de asamblare minim este " + particula.getCelMaiBunFitness());
 
-        System.out.println(asambleaza2(listaProduse, linieProductie));
-        for (Produs produs : listaProduse){
-            System.out.println(produs.getNume()  + " " + produs.getTimpAsamblare());
-        }
+//        System.out.println(asambleaza2(listaProduse, linieProductie));
+//        for (Produs produs : listaProduse){
+//            System.out.println(produs.getNume()  + " " + produs.getTimpAsamblare() + " " + produs.getTimpIntrareLinie());
+//        }
     }
 }

@@ -37,7 +37,7 @@ public class LinieAsamblareUtils {
 
                 if (produs.getListaComponente().contains(componenta)
                         && !produs.getComponenteAsamblate().contains(componenta)
-                        && linieAsamblare.indexOf(iteratieLinieAsamblare) <= masinarii.indexOf(masinarieIteratie)) {
+                        && seAsambleazaComponenteleInOrdine(produs, componenta)) {
 
                     // Fiecare produs e pus pe linia de asamblare si asteapta pana masinaria care urmeaza e libera
                     int timpAsteptare = calculeazaTimpAsteptare(linieAsamblare, iteratieLinieAsamblare);
@@ -62,11 +62,22 @@ public class LinieAsamblareUtils {
         return true;
     }
 
+    public static boolean seAsambleazaComponenteleInOrdine(Produs produs, Componenta componentaDeAsamblat){
+        for (int i = 0; i < produs.getListaComponente().indexOf(componentaDeAsamblat); i++){
+            // Verificam daca toate componentele dinainte au fost asamblate
+            Componenta componenta = produs.getListaComponente().get(i);
+            if (!produs.getComponenteAsamblate().contains(componenta)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static int seteazaTimpIntrare(List<IteratieLinieAsamblare> linieAsamblare){
         for (IteratieLinieAsamblare iteratieLinieAsamblare : linieAsamblare) {
             Produs produsLinie = iteratieLinieAsamblare.getProdus();
             if (produsLinie != null){
-                return produsLinie.getTimpAsamblare();
+                return produsLinie.getTimpAsamblare() + produsLinie.getTimpIntrareLinie();
             }
         }
         return 0;

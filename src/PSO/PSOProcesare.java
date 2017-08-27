@@ -106,7 +106,7 @@ public class PSOProcesare {
     }
 
     public void initializareRoi(List<Produs> listaTotalaProduse){
-        for (int i = 0; i < DIMENSIUNE_ROI; i++){
+        for (int i = 0; i < listaTotalaProduse.size(); i++){
             Particula particula = new Particula();
             List<Produs> copieListaTotalaProduse = new ArrayList<>();
             copieListaTotalaProduse.addAll(listaTotalaProduse);
