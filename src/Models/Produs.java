@@ -1,6 +1,7 @@
 package Models;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Produs {
@@ -15,6 +16,9 @@ public class Produs {
 
     public Produs(){
         super();
+        this.seAsambleaza = false;
+        this.timpAsamblare = 0;
+        this.timpIntrareLinie = 0;
     }
 
     public Produs(Integer id, String nume, List<Componenta> listaComponente, List<Componenta> componenteAsamblate) {
@@ -24,6 +28,7 @@ public class Produs {
         this.componenteAsamblate = componenteAsamblate;
         this.seAsambleaza = false;
         this.timpAsamblare = 0;
+        this.timpIntrareLinie = 0;
     }
 
     public Integer getId() {
@@ -82,15 +87,12 @@ public class Produs {
         this.timpIntrareLinie = timpIntrareLinie;
     }
 
-    public Produs setAtributeProdus(Produs produs){
+    public Produs cloneazaProdusCuDateEsentiale(){
         Produs produsFinal = new Produs();
 
-        produsFinal.setId(produs.getId());
-        produsFinal.setNume(produs.getNume());
-        produsFinal.setListaComponente(produs.getListaComponente());
-        produsFinal.setComponenteAsamblate(produs.getComponenteAsamblate());
-        produsFinal.setTimpAsamblare(produs.getTimpAsamblare());
-        produsFinal.setTimpIntrareLinie(produs.getTimpIntrareLinie());
+        produsFinal.setNume(this.nume);
+        produsFinal.setListaComponente(this.listaComponente);
+        produsFinal.setComponenteAsamblate(new ArrayList<>());
 
         return produsFinal;
     }

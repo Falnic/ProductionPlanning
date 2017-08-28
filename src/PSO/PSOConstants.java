@@ -1,5 +1,5 @@
 package PSO;
 
 public interface PSOConstants {
-    int ITERATII_MAXIME = 100;
+    int ITERATII_MAXIME = 200;
 }

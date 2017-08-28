@@ -6,6 +6,7 @@ import java.util.*;
 
 import static PSO.PSOConstants.*;
 import static PSO.PSOUtilitati.calculeazaLocatie;
+import static PSO.PSOUtilitati.curataPermutare;
 import static Start.Main.asambleaza;
 import static Start.Main.linieProductie;
 
@@ -33,7 +34,11 @@ public class PSOProcesare {
             // Pentru fiecare particula
             // Calculeaza valoare fitness
             for (Particula particula : roi) {
+                // Curata produsele din permutare pentru o asamblare noua
+                particula.setPermutare(curataPermutare(particula.getPermutare()));
+
                 particula.setValoareFitness(asambleaza(particula.getPermutare(), linieProductie));
+                particula.setLocatie(calculeazaLocatie(particula.getPermutare()));
 
                 // If the fitness value is better than the best fitness value (pBest) in history
                 // set current value as the new pBest
@@ -63,8 +68,9 @@ public class PSOProcesare {
                 }
                 particula.setViteza(vitezaNoua);
 
-                List<Produs> pozitieNoua;
-                pozitieNoua = schimbaPozitie(particula);
+                List<Produs> pozitieNoua = schimbaPozitie(particula);
+                curataPermutare(pozitieNoua);
+
                 int fitnessNou = asambleaza(pozitieNoua, linieProductie);
 
                 // Pasul 4 - Schimba pozitia particulei (Schimba valoarea permutarii)
@@ -113,16 +119,15 @@ public class PSOProcesare {
 
             List<Produs> permutare = new ArrayList<>(listaTotalaProduse.size());
             while (!copieListaTotalaProduse.isEmpty()){
-                Produs produs = copieListaTotalaProduse.get(produsAleator.nextInt(copieListaTotalaProduse.size()));
-                copieListaTotalaProduse.remove(produs);
+                int indiceRandom = produsAleator.nextInt(copieListaTotalaProduse.size());
+                Produs produs = copieListaTotalaProduse.get(indiceRandom).cloneazaProdusCuDateEsentiale();
+                copieListaTotalaProduse.remove(indiceRandom);
                 permutare.add(produs);
             }
-            particula.setValoareFitness(asambleaza(permutare, linieProductie));
             particula.setPermutare(permutare);
-
             particula.setLocatie(calculeazaLocatie(permutare));
             // initializam cel mai bun fitness cu prima valoarea fitness
-            particula.setCelMaiBunFitness(particula.getValoareFitness());
+            particula.setCelMaiBunFitness(Integer.MAX_VALUE);
             // initializam cea mai buna solutie cu prima locatie
             particula.setCeaMaiBunaSolutie(particula.getLocatie());
             roi.add(particula);

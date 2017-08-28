@@ -11,143 +11,6 @@ public class Main {
     public static List<Componenta> listaComponente;
     public static List<Produs> listaProduse;
     public static LinieProductie linieProductie;
-    public static int timpIntrareLinie = 0;
-
-    private static Integer calculeazaTimpAsamblare(List<Masinarie> masinarii, Masinarie masinarie){
-        for (int i = masinarii.indexOf(masinarie) + 1; i < masinarii.size(); i++){
-            if (masinarii.get(i).isRuleaza()
-                    && masinarie.getComponenta().getTimpDeMontare() < masinarii.get(i).getComponenta().getTimpDeMontare()){
-                return masinarii.get(i).getComponenta().getTimpDeMontare();
-            }
-        }
-        return masinarie.getComponenta().getTimpDeMontare();
-    }
-
-    private static boolean verificaMasinariiLinie(Map<Produs, Masinarie> tempProdusMasinarieLinkedHashMap, List<Masinarie> masinarii, Masinarie masinarie, Produs produs){
-
-        boolean linieOcupata = false;
-        Iterator iteratorProduseLinieProductie = tempProdusMasinarieLinkedHashMap.entrySet().iterator();
-        while (iteratorProduseLinieProductie.hasNext()){
-            Map.Entry masinarieProdusEntryVerificare = (Map.Entry) iteratorProduseLinieProductie.next();
-            Masinarie masinarieLinie = (Masinarie) masinarieProdusEntryVerificare.getValue();
-
-            if (masinarii.indexOf(masinarieLinie) >= 0
-                    && !masinarieProdusEntryVerificare.getKey().equals(produs)
-                    && masinarii.indexOf(masinarieLinie) < masinarii.indexOf(masinarie)){
-                linieOcupata = true;
-                break;
-            }
-        }
-
-        return linieOcupata;
-    }
-
-    public static Integer asambleaza2(List<Produs> listaProduse, LinieProductie linieProductie){
-        // linkedMapMasinarieProdus este harta cu produsele asignate fiecarei masinarii
-        Map<Produs, Masinarie> produseAsignateLaMasinarie = new LinkedHashMap<>();
-        Map<Produs, List<Componenta>> componenteAsamblateProdus = new HashMap<>();
-
-        List<Masinarie> masinarii = linieProductie.getListaMasinarii();
-        Integer timpAsamblare = 0;
-
-        List<Produs> copieListaProduse = new ArrayList<>();
-        copieListaProduse.addAll(listaProduse);
-
-        Produs primulProdus = copieListaProduse.get(0);
-        for (Masinarie masinarie : masinarii){
-            Componenta componentaMasinarie = masinarie.getComponenta();
-            for (Componenta componentaProdus : primulProdus.getListaComponente()){
-                if (componentaProdus.equals(componentaMasinarie)){
-                    primulProdus.setTimpAsamblare(primulProdus.getTimpAsamblare() + componentaProdus.getTimpDeMontare());
-                    masinarie.setRuleaza(true);
-                    primulProdus.setSeAsambleaza(true);
-                    primulProdus.getComponenteAsamblate().add(componentaProdus);
-
-                    List<Componenta> componenteAsamblate = new ArrayList<>();
-                    componenteAsamblate.add(componentaProdus);
-                    componenteAsamblateProdus.put(primulProdus, componenteAsamblate);
-
-                    break;
-                }
-            }
-            if (primulProdus.isSeAsambleaza()){
-                primulProdus.setSeAsambleaza(false);
-
-                produseAsignateLaMasinarie.put(primulProdus, masinarie);
-                break;
-            }
-        }
-        copieListaProduse.remove(primulProdus);
-
-        Masinarie masinarieIdle = new Masinarie(0, "Masinarie IDLE", null);
-
-        while (!produseAsignateLaMasinarie.isEmpty()) {
-
-            if (!copieListaProduse.isEmpty()){
-                Produs produs = copieListaProduse.get(0);
-                copieListaProduse.remove(produs);
-
-                Iterator iterator = produseAsignateLaMasinarie.keySet().iterator();
-                Produs ultimulPropusAsignatLaMasinarie = (Produs) iterator.next();
-
-                produs.setTimpIntrareLinie(ultimulPropusAsignatLaMasinarie.getTimpAsamblare());
-
-                produseAsignateLaMasinarie.put(produs, masinarieIdle);
-            }
-
-            Map<Produs, Masinarie> copieProduseAsignateLaMasinarie = new LinkedHashMap<>();
-            copieProduseAsignateLaMasinarie.putAll(produseAsignateLaMasinarie);
-
-            int i = -1;
-            Iterator iterator = produseAsignateLaMasinarie.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry masinarieProdusEntry = (Map.Entry) iterator.next();
-                Produs produs = (Produs) masinarieProdusEntry.getKey();
-                if (componenteAsamblateProdus.get(produs) != null
-                        && componenteAsamblateProdus.get(produs).containsAll(produs.getListaComponente())){
-                    timpAsamblare += ((Produs) masinarieProdusEntry.getKey()).getTimpAsamblare();
-                    ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
-                    ((Produs) masinarieProdusEntry.getKey()).setTimpAsamblare(0);
-                    ((Produs) masinarieProdusEntry.getKey()).setComponenteAsamblate(new ArrayList<>());
-                    copieProduseAsignateLaMasinarie.remove(masinarieProdusEntry.getKey());
-                    continue;
-                }
-                i++;
-                for (Masinarie masinarie : masinarii) {
-                    boolean linieOcupata = false;
-                    if (i != 0){
-                        linieOcupata = verificaMasinariiLinie(copieProduseAsignateLaMasinarie, linieProductie.getListaMasinarii(), masinarie, produs);
-                    }
-
-                    if (!produs.isSeAsambleaza() && !linieOcupata){
-                        Componenta componentaMasinarie = masinarie.getComponenta();
-                        for (Componenta componenta : produs.getListaComponente()) {
-                            if (componenta.equals(componentaMasinarie)
-                                    && masinarii.indexOf(masinarieProdusEntry.getValue()) < masinarii.indexOf(masinarie)
-                                    && !masinarie.isRuleaza()) {
-
-                                ((Masinarie) masinarieProdusEntry.getValue()).setRuleaza(false);
-                                masinarie.setRuleaza(true);
-                                copieProduseAsignateLaMasinarie.replace(produs, (Masinarie) masinarieProdusEntry.getValue(), masinarie);
-
-                                produs.getComponenteAsamblate().add(componenta);
-                                componenteAsamblateProdus.put(produs, produs.getComponenteAsamblate());
-
-                                produs.setSeAsambleaza(true);
-                                produs.setTimpAsamblare(produs.getTimpAsamblare() + calculeazaTimpAsamblare(masinarii, masinarie));
-                                break;
-                            }
-                        }
-                    }
-                }
-                produs.setSeAsambleaza(false);
-            }
-
-            produseAsignateLaMasinarie.clear();
-            produseAsignateLaMasinarie.putAll(copieProduseAsignateLaMasinarie);
-        }
-        return timpAsamblare;
-    }
 
     public static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
 
@@ -175,7 +38,7 @@ public class Main {
         } while (!LinieAsamblareUtils.esteLiniaDeAsamblareGoala(linieAsamblare));
 
         // Pentru a calcula timpul total de asamblare parcurgem toate produsele si luam timpul de asamblare al fiecarui produs
-        return calculeazaTimpTotalDeAsamblare();
+        return calculeazaTimpTotalDeAsamblare(listaProduse);
     }
 /*     Dupa initializare  ar trebui sa arate asa
        Punem primul produs pe linia de productie intr-o stare intermediara inainte sa fie procesat
@@ -190,7 +53,7 @@ public class Main {
         return  linieAsamblare;
     }
 
-    private static int calculeazaTimpTotalDeAsamblare(){
+    private static int calculeazaTimpTotalDeAsamblare(List<Produs> listaProduse){
         int timpTotalAsamblare = 0;
 
         for (Produs produs : listaProduse){
@@ -264,7 +127,8 @@ public class Main {
 //        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
 //                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5); add(P6);}};
+//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5); add(P6);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P2); add(P6); add(P3); add(P4); add(P1); add(P5);}};
 
         return listaProduse;
     }
@@ -279,12 +143,13 @@ public class Main {
         Particula particula = psoProcesare.executa(listaProduse);
         System.out.println("Cea mai buna solutie este");
         for (int i = 0; i < particula.getPermutare().size(); i++){
-                System.out.print(particula.getPermutare().get(i).getNume() + " ");
+            Produs produs = particula.getPermutare().get(i);
+            System.out.print(produs.getNume() + " " + produs.getTimpAsamblare() + " " + produs.getTimpIntrareLinie());
+            System.out.println();
         }
-        System.out.println();
         System.out.println("Timpul de asamblare minim este " + particula.getCelMaiBunFitness());
 
-//        System.out.println(asambleaza2(listaProduse, linieProductie));
+//        System.out.println(asambleaza(listaProduse, linieProductie));
 //        for (Produs produs : listaProduse){
 //            System.out.println(produs.getNume()  + " " + produs.getTimpAsamblare() + " " + produs.getTimpIntrareLinie());
 //        }

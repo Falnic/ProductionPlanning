@@ -31,4 +31,14 @@ public class PSOUtilitati {
         }
         return X;
     }
+
+    public static List<Produs> curataPermutare(List<Produs> permutare){
+        for (Produs produs : permutare){
+            produs.setComponenteAsamblate(new ArrayList<>());
+            produs.setTimpAsamblare(0);
+            produs.setTimpIntrareLinie(0);
+        }
+        return permutare;
+    }
+
 }

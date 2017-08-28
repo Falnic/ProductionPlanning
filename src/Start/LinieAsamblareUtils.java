@@ -31,13 +31,13 @@ public class LinieAsamblareUtils {
 
     public static List<IteratieLinieAsamblare> puneProdusPeLinie(List<IteratieLinieAsamblare> linieAsamblare, List<Masinarie> masinarii, Produs produs) {
         for (IteratieLinieAsamblare iteratieLinieAsamblare : linieAsamblare) {
-            if (iteratieLinieAsamblare.getProdus() == null) {
+            if (iteratieLinieAsamblare.getProdus() == null
+                    && sePoatePuneProdusulPeLinie(linieAsamblare, iteratieLinieAsamblare, produs)) {
                 Masinarie masinarieIteratie = iteratieLinieAsamblare.getMasinarie();
                 Componenta componenta = masinarieIteratie.getComponenta();
 
                 if (produs.getListaComponente().contains(componenta)
-                        && !produs.getComponenteAsamblate().contains(componenta)
-                        && seAsambleazaComponenteleInOrdine(produs, componenta)) {
+                        && !produs.getComponenteAsamblate().contains(componenta)) {
 
                     // Fiecare produs e pus pe linia de asamblare si asteapta pana masinaria care urmeaza e libera
                     int timpAsteptare = calculeazaTimpAsteptare(linieAsamblare, iteratieLinieAsamblare);
@@ -56,6 +56,17 @@ public class LinieAsamblareUtils {
     public static boolean esteLiniaDeAsamblareGoala(List<IteratieLinieAsamblare> linieAsamblare){
         for (IteratieLinieAsamblare iteratieLinieAsamblare : linieAsamblare) {
             if (iteratieLinieAsamblare.getProdus() != null){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean sePoatePuneProdusulPeLinie(List<IteratieLinieAsamblare> linieAsamblare, IteratieLinieAsamblare iteratieLinieAsamblareDorita, Produs produs){
+        for (int i = linieAsamblare.indexOf(iteratieLinieAsamblareDorita) - 1; i >= 0; i--){
+            IteratieLinieAsamblare iteratieLinieAsamblare = linieAsamblare.get(i);
+            if (iteratieLinieAsamblare.getProdus() != null && !iteratieLinieAsamblare.getProdus().equals(produs)
+                    && indiceProdusInListaAsamblare(linieAsamblare, produs) < indiceProdusInListaAsamblare(linieAsamblare, iteratieLinieAsamblare.getProdus())){
                 return false;
             }
         }
@@ -97,4 +108,14 @@ public class LinieAsamblareUtils {
         return timpAsamblare;
     }
 
+
+    public static int indiceProdusInListaAsamblare(List<IteratieLinieAsamblare> linieAsamblare, Produs produs){
+        for (int i = 0; i < linieAsamblare.size(); i++){
+            Produs produsIteratie = linieAsamblare.get(i).getProdus();
+            if (produsIteratie != null && produsIteratie.equals(produs)){
+                return i;
+            }
+        }
+        return -1;
+    }
 }
