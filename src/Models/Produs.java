@@ -31,6 +31,17 @@ public class Produs {
         this.timpIntrareLinie = 0;
     }
 
+    public Produs(Integer id, String nume, List<Componenta> listaComponente, List<Componenta> componenteAsamblate,
+                    Integer timpAsamblare, Integer timpIntrareLinie) {
+        this.id = id;
+        this.nume = nume;
+        this.listaComponente = listaComponente;
+        this.componenteAsamblate = componenteAsamblate;
+        this.seAsambleaza = false;
+        this.timpAsamblare = timpAsamblare;
+        this.timpIntrareLinie = timpIntrareLinie;
+    }
+
     public Integer getId() {
         return id;
     }

@@ -7,7 +7,7 @@ import Models.Produs;
 
 import java.util.List;
 
-public class LinieAsamblareUtils {
+public class LinieAsamblareUtilitati {
 
 
     public static List<IteratieLinieAsamblare> asambleazaLiniaCuIteratiileCurente(List<IteratieLinieAsamblare> linieAsamblare, List<Masinarie> masinarii){

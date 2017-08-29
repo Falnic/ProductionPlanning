@@ -6,6 +6,9 @@ import PSO.Particula;
 
 import java.util.*;
 
+import static PSO.PSOConstants.ITERATII_POS;
+import static PSO.PSOUtilitati.curataPermutare;
+
 public class Main {
 
     public static List<Componenta> listaComponente;
@@ -23,19 +26,19 @@ public class Main {
         for (Produs produs : listaProduse){
             do{
                 produs.setSeAsambleaza(false);
-                produs.setTimpIntrareLinie(LinieAsamblareUtils.seteazaTimpIntrare(linieAsamblare));
+                produs.setTimpIntrareLinie(LinieAsamblareUtilitati.seteazaTimpIntrare(linieAsamblare));
 
                 // Asamblam linia curenta de produse
-                linieAsamblare = LinieAsamblareUtils.asambleazaLiniaCuIteratiileCurente(linieAsamblare, masinarii);
+                linieAsamblare = LinieAsamblareUtilitati.asambleazaLiniaCuIteratiileCurente(linieAsamblare, masinarii);
                 // Cautam masinarie pentru produsul care vrea sa intre pe linie
-                linieAsamblare = LinieAsamblareUtils.puneProdusPeLinie(linieAsamblare, masinarii, produs);
+                linieAsamblare = LinieAsamblareUtilitati.puneProdusPeLinie(linieAsamblare, masinarii, produs);
             } while (!produs.isSeAsambleaza());
         }
 
         do{
-            linieAsamblare = LinieAsamblareUtils.asambleazaLiniaCuIteratiileCurente(linieAsamblare, linieProductie.getListaMasinarii());
+            linieAsamblare = LinieAsamblareUtilitati.asambleazaLiniaCuIteratiileCurente(linieAsamblare, linieProductie.getListaMasinarii());
 
-        } while (!LinieAsamblareUtils.esteLiniaDeAsamblareGoala(linieAsamblare));
+        } while (!LinieAsamblareUtilitati.esteLiniaDeAsamblareGoala(linieAsamblare));
 
         // Pentru a calcula timpul total de asamblare parcurgem toate produsele si luam timpul de asamblare al fiecarui produs
         return calculeazaTimpTotalDeAsamblare(listaProduse);
@@ -68,7 +71,7 @@ public class Main {
             return new ArrayList<List<Produs>>() {{add(listaProduse);}};
         }
 
-        List<List<Produs>> permutari = new ArrayList<List<Produs>>();
+        List<List<Produs>> permutari = new ArrayList<>();
 
         Produs produs = listaProduse.get(0);
         for (List<Produs> permutare : permuta(listaProduse.subList(1, listaProduse.size()))){
@@ -118,20 +121,81 @@ public class Main {
         final Produs P4 = new Produs(3, "P4", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(3));}}, new ArrayList<>());
         final Produs P5 = new Produs(4, "P5", new ArrayList<Componenta>(){{add(listaComponente.get(1)); add(listaComponente.get(2)); add(listaComponente.get(4));}}, new ArrayList<>());
         final Produs P6 = new Produs(5, "P6", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(3)); add(listaComponente.get(4));}}, new ArrayList<>());
-//
-//        final Produs P7 = new Produs(6, "P7", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(3)); add(listaComponente.get(0));}}, new ArrayList<>());
-//        final Produs P8 = new Produs(7, "P8", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(1)); add(listaComponente.get(0));}}, new ArrayList<>());
-//        final Produs P9 = new Produs(8, "P9", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(1));}}, new ArrayList<>());
-//        final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(listaComponente.get(3)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
+
+        final Produs P7 = new Produs(6, "P7", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(3)); add(listaComponente.get(0));}}, new ArrayList<>());
+        final Produs P8 = new Produs(7, "P8", new ArrayList<Componenta>(){{add(listaComponente.get(2)); add(listaComponente.get(1)); add(listaComponente.get(0));}}, new ArrayList<>());
+        final Produs P9 = new Produs(8, "P9", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(1));}}, new ArrayList<>());
+        final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(listaComponente.get(3)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
 
 //        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
 //                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5); add(P6);}};
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P2); add(P6); add(P3); add(P4); add(P1); add(P5);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5); add(P6);
+                                                             add(P7); add(P8); add(P9); add(P10);}};
+//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P2); add(P3); add(P1); add(P4); add(P6); add(P5); add(P9);}};
 
         return listaProduse;
     }
+
+    public static List<Produs> cloneazaPermutareCuProduse(List<Produs> permutare){
+        List<Produs> permutareClonata = new ArrayList<>();
+        for (Produs produs : permutare){
+            Produs produsNou = new Produs(produs.getId(), produs.getNume(), produs.getListaComponente(),
+                                            produs.getComponenteAsamblate(), produs.getTimpAsamblare(), produs.getTimpIntrareLinie());
+            permutareClonata.add(produsNou);
+        }
+        return permutareClonata;
+    }
+
+    public static void calculeazaCuPermutari(){
+        List<List<Produs>> listaPermutari = permuta(listaProduse);
+        List<Produs> ceaMaiBunaPermutare = listaPermutari.get(0);
+        int timpAsamblareMinim = Integer.MAX_VALUE;
+        for (List<Produs> permutare : listaPermutari){
+            curataPermutare(permutare);
+            int timpAsamblare = asambleaza(permutare, linieProductie);
+            if (timpAsamblareMinim > timpAsamblare){
+                timpAsamblareMinim = timpAsamblare;
+                ceaMaiBunaPermutare = cloneazaPermutareCuProduse(permutare);
+            }
+        }
+        System.out.println("Cea mai buna solutie ");
+        System.out.println("Cu timpul de asamblare = " + timpAsamblareMinim);
+        for (int i = 0; i < ceaMaiBunaPermutare.size(); i++){
+            System.out.print(ceaMaiBunaPermutare.get(i).getNume() + "\t");
+        }
+        System.out.println();
+        for (Produs produs : ceaMaiBunaPermutare){
+            System.out.print(produs.getTimpAsamblare() + "\t");
+        }
+        System.out.println();
+        for (Produs produs : ceaMaiBunaPermutare){
+            System.out.print(produs.getTimpIntrareLinie() + "\t");
+        }
+        System.out.println();
+    }
+    public static void calculeazaCuPOS(){
+
+        PSOProcesare psoProcesare = new PSOProcesare();
+        Particula ceaMaiBunaParticula = new Particula();
+        ceaMaiBunaParticula.setCelMaiBunFitness(Integer.MAX_VALUE);
+
+        for (int i = 0; i < ITERATII_POS; i++){
+            Particula particula = psoProcesare.executa(listaProduse);
+            if (ceaMaiBunaParticula.getCelMaiBunFitness() > particula.getCelMaiBunFitness()){
+                ceaMaiBunaParticula = particula;
+            }
+        }
+
+        System.out.println("Cea mai buna solutie este");
+        for (int i = 0; i < ceaMaiBunaParticula.getPermutare().size(); i++){
+            Produs produs = ceaMaiBunaParticula.getPermutare().get(i);
+            System.out.print(produs.getNume() + "\t" + produs.getTimpAsamblare() + "\t" + produs.getTimpIntrareLinie());
+            System.out.println();
+        }
+        System.out.println("Timpul de asamblare minim = " + ceaMaiBunaParticula.getCelMaiBunFitness());
+    }
+
 
     public static void main(String[] args){
 
@@ -139,19 +203,8 @@ public class Main {
         listaProduse = generareListaProduse(listaComponente);
         linieProductie = generareLinieProductie(listaComponente);
 
-        PSOProcesare psoProcesare = new PSOProcesare();
-        Particula particula = psoProcesare.executa(listaProduse);
-        System.out.println("Cea mai buna solutie este");
-        for (int i = 0; i < particula.getPermutare().size(); i++){
-            Produs produs = particula.getPermutare().get(i);
-            System.out.print(produs.getNume() + " " + produs.getTimpAsamblare() + " " + produs.getTimpIntrareLinie());
-            System.out.println();
-        }
-        System.out.println("Timpul de asamblare minim este " + particula.getCelMaiBunFitness());
+        calculeazaCuPermutari();
+//        calculeazaCuPOS();
 
-//        System.out.println(asambleaza(listaProduse, linieProductie));
-//        for (Produs produs : listaProduse){
-//            System.out.println(produs.getNume()  + " " + produs.getTimpAsamblare() + " " + produs.getTimpIntrareLinie());
-//        }
     }
 }
