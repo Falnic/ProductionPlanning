@@ -130,8 +130,19 @@ public class Main {
 //        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
 //                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
 
-        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5); add(P6);
-                                                             add(P7); add(P8); add(P9); add(P10);}};
+        List<Produs> listaProduse = new ArrayList<Produs>(){
+            {
+                add(P1);
+                add(P2);
+                add(P3);
+                add(P4);
+                add(P5);
+                add(P6);
+                add(P7);
+                add(P8);
+                add(P9);
+                add(P10);
+            }};// add(P7); add(P8); add(P9); add(P10);}};
 //        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P2); add(P3); add(P1); add(P4); add(P6); add(P5); add(P9);}};
 
         return listaProduse;
@@ -148,6 +159,8 @@ public class Main {
     }
 
     public static void calculeazaCuPermutari(){
+        long startTime = System.currentTimeMillis();
+
         List<List<Produs>> listaPermutari = permuta(listaProduse);
         List<Produs> ceaMaiBunaPermutare = listaPermutari.get(0);
         int timpAsamblareMinim = Integer.MAX_VALUE;
@@ -173,8 +186,13 @@ public class Main {
             System.out.print(produs.getTimpIntrareLinie() + "\t");
         }
         System.out.println();
+        long endTime   = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        System.out.println("timpul total de executie = " + totalTime);
     }
+
     public static void calculeazaCuPOS(){
+        long startTime = System.currentTimeMillis();
 
         PSOProcesare psoProcesare = new PSOProcesare();
         Particula ceaMaiBunaParticula = new Particula();
@@ -194,17 +212,33 @@ public class Main {
             System.out.println();
         }
         System.out.println("Timpul de asamblare minim = " + ceaMaiBunaParticula.getCelMaiBunFitness());
+
+        long endTime   = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        System.out.println("timpul total de executie = " + totalTime);
     }
 
+    public static List<Produs> genereazaNumarMareProduse(List<Produs> listaProduse, int numarProduseDeGenerat){
+        List<Produs> listaTotalaProduse = new ArrayList<>();
+        if (numarProduseDeGenerat < listaProduse.size()){
+            return listaProduse;
+        } else {
+            for (int i = 0; i < numarProduseDeGenerat; i++){
+                listaTotalaProduse.add(listaProduse.get(i % listaProduse.size()).cloneazaProdusCuDateEsentiale());
+            }
+        }
+        return listaTotalaProduse;
+    }
 
     public static void main(String[] args){
 
         listaComponente = generareListaComponente();
         listaProduse = generareListaProduse(listaComponente);
+//        listaProduse = genereazaNumarMareProduse(listaProduse, 60);
         linieProductie = generareLinieProductie(listaComponente);
 
-        calculeazaCuPermutari();
-//        calculeazaCuPOS();
+//        calculeazaCuPermutari();
+        calculeazaCuPOS();
 
     }
 }
