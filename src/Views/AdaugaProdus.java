@@ -1,17 +1,19 @@
 package Views;
 
-import Business.Main;
+import Models.Componenta;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class AdaugaProdus {
-    private JPanel AdaugaProdusPanel;
+    private JPanel panelAdaugaProdus;
     private JTextField idTextField;
     private JTextField numeTextField;
     private JButton adaugăProdusNouButton;
-    private JScrollPane jScrollPaneAdaugaProdus;
+    private JTextField componenteDeAdaugattextField;
+    private JTextArea textArea1;
 
     public AdaugaProdus() {
         adaugăProdusNouButton.addActionListener(new ActionListener() {
@@ -25,19 +27,11 @@ public class AdaugaProdus {
         });
     }
 
-    public JPanel getAdaugaProdusPanel() {
-        return AdaugaProdusPanel;
+    public JPanel getPanelAdaugaProdus() {
+        return panelAdaugaProdus;
     }
 
-    public void setAdaugaProdusPanel(JPanel adaugaProdusPanel) {
-        AdaugaProdusPanel = adaugaProdusPanel;
-    }
-
-    public JScrollPane getjScrollPaneAdaugaProdus() {
-        return jScrollPaneAdaugaProdus;
-    }
-
-    public void setjScrollPaneAdaugaProdus(JScrollPane jScrollPaneAdaugaProdus) {
-        this.jScrollPaneAdaugaProdus = jScrollPaneAdaugaProdus;
+    public void setPanelAdaugaProdus(JPanel panelAdaugaProdus) {
+        this.panelAdaugaProdus = panelAdaugaProdus;
     }
 }
