@@ -1,4 +1,4 @@
-package Start;
+package Business;
 
 import Models.Componenta;
 import Models.IteratieLinieAsamblare;

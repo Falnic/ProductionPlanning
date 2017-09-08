@@ -1,4 +1,4 @@
-package Start;
+package Business;
 
 import Models.*;
 import PSO.PSOProcesare;
@@ -6,6 +6,7 @@ import PSO.Particula;
 
 import java.util.*;
 
+import static PSO.PSOConstants.ITERATII_MAXIME;
 import static PSO.PSOConstants.ITERATII_POS;
 import static PSO.PSOUtilitati.curataPermutare;
 
@@ -127,9 +128,6 @@ public class Main {
         final Produs P9 = new Produs(8, "P9", new ArrayList<Componenta>(){{add(listaComponente.get(0)); add(listaComponente.get(1)); add(listaComponente.get(1));}}, new ArrayList<>());
         final Produs P10 = new Produs(10, "P10", new ArrayList<Componenta>(){{add(listaComponente.get(3)); add(listaComponente.get(2)); add(listaComponente.get(0));}}, new ArrayList<>());
 
-//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P1); add(P2); add(P3); add(P4); add(P5);
-//                                                             add(P6); add(P7); add(P8); add(P9); add(P10);}};
-
         List<Produs> listaProduse = new ArrayList<Produs>(){
             {
                 add(P1);
@@ -142,8 +140,7 @@ public class Main {
                 add(P8);
                 add(P9);
                 add(P10);
-            }};// add(P7); add(P8); add(P9); add(P10);}};
-//        List<Produs> listaProduse = new ArrayList<Produs>(){{add(P2); add(P3); add(P1); add(P4); add(P6); add(P5); add(P9);}};
+            }};
 
         return listaProduse;
     }
@@ -199,6 +196,7 @@ public class Main {
         ceaMaiBunaParticula.setCelMaiBunFitness(Integer.MAX_VALUE);
 
         for (int i = 0; i < ITERATII_POS; i++){
+            System.out.println("###################### Programul de afla la iteratia "  + i * ITERATII_MAXIME);
             Particula particula = psoProcesare.executa(listaProduse);
             if (ceaMaiBunaParticula.getCelMaiBunFitness() > particula.getCelMaiBunFitness()){
                 ceaMaiBunaParticula = particula;
@@ -230,15 +228,30 @@ public class Main {
         return listaTotalaProduse;
     }
 
-    public static void main(String[] args){
+    public static HashMap<Integer, String> getIdNumeComponente(){
+        HashMap hashMap = new HashMap();
+        for (Componenta componenta : listaComponente){
+            hashMap.put(componenta.getId(), componenta.getNume());
+        }
+        return hashMap;
+    }
 
+    public static List<String> getNumeComponente(){
+        List<String> listaStringuri = new ArrayList<>();
+        for (Componenta componenta : listaComponente){
+            listaStringuri.add(componenta.getNume());
+        }
+        return listaStringuri;
+    }
+
+    public static boolean creazaProdusNou(Integer id, String nume, List<Componenta> listaComponente){
+        Produs produs = new Produs(id, nume, listaComponente, new ArrayList<>());
+        return true;
+    }
+
+    public static void genereazaDateInitiale(){
         listaComponente = generareListaComponente();
         listaProduse = generareListaProduse(listaComponente);
-//        listaProduse = genereazaNumarMareProduse(listaProduse, 60);
         linieProductie = generareLinieProductie(listaComponente);
-
-//        calculeazaCuPermutari();
-        calculeazaCuPOS();
-
     }
 }

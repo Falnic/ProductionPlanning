@@ -7,8 +7,8 @@ import java.util.*;
 import static PSO.PSOConstants.*;
 import static PSO.PSOUtilitati.calculeazaLocatie;
 import static PSO.PSOUtilitati.curataPermutare;
-import static Start.Main.asambleaza;
-import static Start.Main.linieProductie;
+import static Business.Main.asambleaza;
+import static Business.Main.linieProductie;
 
 public class PSOProcesare {
 
@@ -28,7 +28,7 @@ public class PSOProcesare {
         int iteratie = 0;
 
         while(iteratie < ITERATII_MAXIME) {
-
+            System.out.println("Programul de afla la iteratia "  + iteratie);
             // Pasul 1
 
             // Pentru fiecare particula
@@ -130,7 +130,11 @@ public class PSOProcesare {
             particula.setCelMaiBunFitness(Integer.MAX_VALUE);
             // initializam cea mai buna solutie cu prima locatie
             particula.setCeaMaiBunaSolutie(particula.getLocatie());
-            roi.add(particula);
+            if (roi.size() < listaTotalaProduse.size()){
+                roi.add(particula);
+            } else {
+                roi.set(i, particula);
+            }
         }
     }
 }
