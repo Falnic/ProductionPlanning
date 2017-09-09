@@ -46,4 +46,9 @@ public class Masinarie {
     public void setRuleaza(Boolean ruleaza) {
         this.ruleaza = ruleaza;
     }
+
+    @Override
+    public String toString() {
+        return nume + " " + componenta.getNume() + " ";
+    }
 }

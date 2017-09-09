@@ -37,4 +37,9 @@ public class Componenta {
     public void setTimpDeMontare(Integer timpDeMontare) {
         this.timpDeMontare = timpDeMontare;
     }
+
+    @Override
+    public String toString(){
+        return nume + " " + timpDeMontare;
+    }
 }

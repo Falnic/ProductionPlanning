@@ -15,6 +15,8 @@ public class StartView {
 
     JPanel jPanel;
     JTextArea textArea;
+    JButton afiseazaProduse;
+    JButton afiseazaMasinarii;
 
     private JButton adaugaProdusButton;
     private JButton adaugaComponentaButton;
@@ -62,11 +64,9 @@ public class StartView {
         adaugaMasinarieButton = new JButton("Adauga Masinarie");
         panelHolder[1][2].add(adaugaMasinarieButton);
 
-
         textArea = new JTextArea();
         textArea.setColumns(20);
         textArea.setRows(5);
-
         JScrollPane textAreaScrollPane = new JScrollPane(textArea);
         panelHolder[2][1].add(textAreaScrollPane);
 
@@ -76,8 +76,14 @@ public class StartView {
         planificaFolosindBacktrackingButton = new JButton("Planifica Backtracking");
         panelHolder[3][2].add(planificaFolosindBacktrackingButton);
 
+        afiseazaProduse = new JButton("Afiseaza Produse");
+        panelHolder[4][0].add(afiseazaProduse);
+
         genereazaProduseAleatoareButton = new JButton("Genereaza Produse");
         panelHolder[4][1].add(genereazaProduseAleatoareButton);
+
+        afiseazaMasinarii = new JButton("Afiseaza Masinarii");
+        panelHolder[4][2].add(afiseazaMasinarii);
 
         genereazaProduseTextField = new JTextField();
         genereazaProduseTextField.setColumns(13);
@@ -139,6 +145,20 @@ public class StartView {
             @Override
             public void actionPerformed(ActionEvent e) {
                 textArea.setText(Main.getCeaMaiBunaPermutare());
+            }
+        });
+
+        afiseazaProduse.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.setText(Main.getProdusePeComponente());
+            }
+        });
+
+        afiseazaMasinarii.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.setText(Main.getMasinarii());
             }
         });
     }

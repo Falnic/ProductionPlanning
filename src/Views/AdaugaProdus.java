@@ -94,12 +94,10 @@ public class AdaugaProdus {
             public void actionPerformed(ActionEvent e) {
                 boolean rezultat = false;
                 try {
-                    Main main = new Main();
-
                     Integer id = Integer.parseInt(idTextField.getText());
                     String nume = numeTextField.getText();
                     int[] indiciComponente = jList.getSelectedIndices();
-                    rezultat = main.creazaProdusNou(id, nume, indiciComponente);
+                    rezultat = Main.creazaProdusNou(id, nume, indiciComponente);
                 } catch (NumberFormatException e1){
                     e1.printStackTrace();
                 }

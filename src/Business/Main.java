@@ -96,8 +96,10 @@ public class Main {
         final Componenta C3 = new Componenta(3,"C3", 30);
         final Componenta C4 = new Componenta(4,"C4", 40);
         final Componenta C5 = new Componenta(5,"C5", 50);
-        
-        return Arrays.asList(C1, C2, C3, C4, C5);
+
+        List<Componenta> list = new ArrayList<Componenta>(){{
+            add(C1); add(C2); add(C3); add(C4); add(C5);}};
+        return list;
     }
 
     public static LinieProductie generareLinieProductie(List<Componenta> listaComponente){
@@ -284,7 +286,28 @@ public class Main {
         return listaStringuri;
     }
 
-    public boolean creazaMasinarieNoua(Integer id, String nume, int indiceComponenta){
+    public static String getProdusePeComponente(){
+        String rezultat = "Produs pe componente\n";
+        for (Produs produs : listaProduse){
+            rezultat += produs.getNume();
+            rezultat += "-";
+            for (Componenta componenta : produs.getListaComponente()){
+                rezultat += componenta.toString() + " ";
+            }
+            rezultat += "\n";
+        }
+        return rezultat;
+    }
+
+    public static String getMasinarii(){
+        String rezultat = "Masinarii\n";
+        for (Masinarie masinarie : linieProductie.getListaMasinarii()){
+            rezultat += masinarie.toString() + "\n";
+        }
+        return rezultat;
+    }
+
+    public static boolean creazaMasinarieNoua(Integer id, String nume, int indiceComponenta){
 
         Componenta componenta = listaComponente.get(indiceComponenta);
         Masinarie masinarie = new Masinarie(id, nume, componenta);
@@ -292,16 +315,16 @@ public class Main {
         return masinarie != null ? true : false;
     }
 
-    public boolean creazaComponentaNoua(Integer id, String nume, Integer timpMontare){
+    public static boolean creazaComponentaNoua(Integer id, String nume, Integer timpMontare){
         Componenta componenta = new Componenta(id, nume, timpMontare);
         listaComponente.add(componenta);
         return componenta != null ? true : false;
     }
 
-    public boolean creazaProdusNou(Integer id, String nume, int indiciComponente[ ]){
+    public static boolean creazaProdusNou(Integer id, String nume, int indiciComponente[ ]){
         List<Componenta> listaComponenteProdusNou = new ArrayList<>();
         for (int i = 0; i < indiciComponente.length; i++){
-            listaComponenteProdusNou.add(listaComponente.get(i));
+            listaComponenteProdusNou.add(listaComponente.get(indiciComponente[i]));
         }
         Produs produs = new Produs(id, nume, listaComponenteProdusNou, new ArrayList<>());
         listaProduse.add(produs);

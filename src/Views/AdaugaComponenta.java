@@ -83,18 +83,16 @@ public class AdaugaComponenta {
             public void actionPerformed(ActionEvent e) {
                 boolean rezultat = false;
                 try {
-                    Main main = new Main();
-
                     Integer id = Integer.parseInt(idTextField.getText());
                     String nume = numeTextField.getText();
                     Integer timpMontare = Integer.parseInt(timpMontareTextField.getText());
-                    main.creazaComponentaNoua(id, nume, timpMontare);
+                    rezultat = Main.creazaComponentaNoua(id, nume, timpMontare);
                 } catch (NumberFormatException e1){
                     e1.printStackTrace();
                 }
 
                 if (rezultat == true){
-                    JOptionPane.showMessageDialog( null, "Produsul a fost creat cu succes"," Produs adaugat cu succes" , JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog( null, "Componenta a fost creat cu succes"," Componenta adaugat cu succes" , JOptionPane.PLAIN_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog( null, "Eroare, Componenta nu a fost creata"," Eroare" , JOptionPane.PLAIN_MESSAGE);
                 }
