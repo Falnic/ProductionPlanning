@@ -15,6 +15,7 @@ public class Main {
     public static List<Componenta> listaComponente;
     public static List<Produs> listaProduse;
     public static LinieProductie linieProductie;
+    public static int timpAsamblarePermutare = 0;
 
     public static Integer asambleaza(List<Produs> listaProduse, LinieProductie linieProductie){
 
@@ -135,11 +136,11 @@ public class Main {
                 add(P3);
                 add(P4);
                 add(P5);
-                add(P6);
-                add(P7);
-                add(P8);
-                add(P9);
-                add(P10);
+//                add(P6);
+//                add(P7);
+//                add(P8);
+//                add(P9);
+//                add(P10);
             }};
 
         return listaProduse;
@@ -155,7 +156,7 @@ public class Main {
         return permutareClonata;
     }
 
-    public static void calculeazaCuPermutari(){
+    public static List<Produs> calculeazaCuPermutari(){
         long startTime = System.currentTimeMillis();
 
         List<List<Produs>> listaPermutari = permuta(listaProduse);
@@ -171,6 +172,8 @@ public class Main {
         }
         System.out.println("Cea mai buna solutie ");
         System.out.println("Cu timpul de asamblare = " + timpAsamblareMinim);
+        timpAsamblarePermutare = timpAsamblareMinim;
+
         for (int i = 0; i < ceaMaiBunaPermutare.size(); i++){
             System.out.print(ceaMaiBunaPermutare.get(i).getNume() + "\t");
         }
@@ -186,9 +189,41 @@ public class Main {
         long endTime   = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         System.out.println("timpul total de executie = " + totalTime);
+
+        return ceaMaiBunaPermutare;
     }
 
-    public static void calculeazaCuPOS(){
+    public static String getCeaMaiBunaPermutare(){
+        List<Produs> permutare = calculeazaCuPermutari();
+        String rezultat = "Backtracking\n";
+        rezultat +="Timpul de asamblare = " + timpAsamblarePermutare + "\n";
+
+        rezultat += permutare.get(0).getNume() + ",";
+        for (int i = 1; i < permutare.size(); i++){
+            if (i % 10 == 0){
+                rezultat += permutare.get(i).getNume() + "\n";
+            }
+            rezultat += permutare.get(i).getNume() + ",";
+        }
+        return rezultat;
+    }
+
+    public static String getCeaMaiBunaSolutie(){
+        Particula particula = calculeazaCuPOS();
+        String rezultat = "Optimizarea roiului de particule\n";
+        rezultat +="Timpul de asamblare = " + particula.getCelMaiBunFitness() + "\n";
+        rezultat += particula.getPermutare().get(0).getNume() + ",";
+        for (int i = 1; i < particula.getPermutare().size(); i++){
+            Produs produs = particula.getPermutare().get(i);
+            if (i % 10 == 0){
+                rezultat += produs.getNume() + "\n";
+            }
+            rezultat += produs.getNume() + ",";
+        }
+        return rezultat;
+    }
+
+    public static Particula calculeazaCuPOS(){
         long startTime = System.currentTimeMillis();
 
         PSOProcesare psoProcesare = new PSOProcesare();
@@ -214,26 +249,31 @@ public class Main {
         long endTime   = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         System.out.println("timpul total de executie = " + totalTime);
+
+        return ceaMaiBunaParticula;
     }
 
-    public static List<Produs> genereazaNumarMareProduse(List<Produs> listaProduse, int numarProduseDeGenerat){
+    public static void genereazaNumarMareProduse(int numarProduseDeGenerat){
         List<Produs> listaTotalaProduse = new ArrayList<>();
-        if (numarProduseDeGenerat < listaProduse.size()){
-            return listaProduse;
-        } else {
+        if (numarProduseDeGenerat > listaProduse.size()){
             for (int i = 0; i < numarProduseDeGenerat; i++){
                 listaTotalaProduse.add(listaProduse.get(i % listaProduse.size()).cloneazaProdusCuDateEsentiale());
             }
+            listaProduse = listaTotalaProduse;
         }
-        return listaTotalaProduse;
     }
 
-    public static HashMap<Integer, String> getIdNumeComponente(){
-        HashMap hashMap = new HashMap();
-        for (Componenta componenta : listaComponente){
-            hashMap.put(componenta.getId(), componenta.getNume());
+    public static String getNumeProduse(){
+        String numeProduse ="";
+        numeProduse += listaProduse.get(0).getNume() + ",";
+        for (int i = 1; i < listaProduse.size(); i++){
+            Produs produs = listaProduse.get(i);
+            if (i % 10 == 0){
+                numeProduse += produs.getNume() + "\n";
+            }
+            numeProduse += produs.getNume() + ",";
         }
-        return hashMap;
+        return numeProduse;
     }
 
     public static List<String> getNumeComponente(){
@@ -244,9 +284,28 @@ public class Main {
         return listaStringuri;
     }
 
-    public static boolean creazaProdusNou(Integer id, String nume, List<Componenta> listaComponente){
-        Produs produs = new Produs(id, nume, listaComponente, new ArrayList<>());
-        return true;
+    public boolean creazaMasinarieNoua(Integer id, String nume, int indiceComponenta){
+
+        Componenta componenta = listaComponente.get(indiceComponenta);
+        Masinarie masinarie = new Masinarie(id, nume, componenta);
+        linieProductie.getListaMasinarii().add(masinarie);
+        return masinarie != null ? true : false;
+    }
+
+    public boolean creazaComponentaNoua(Integer id, String nume, Integer timpMontare){
+        Componenta componenta = new Componenta(id, nume, timpMontare);
+        listaComponente.add(componenta);
+        return componenta != null ? true : false;
+    }
+
+    public boolean creazaProdusNou(Integer id, String nume, int indiciComponente[ ]){
+        List<Componenta> listaComponenteProdusNou = new ArrayList<>();
+        for (int i = 0; i < indiciComponente.length; i++){
+            listaComponenteProdusNou.add(listaComponente.get(i));
+        }
+        Produs produs = new Produs(id, nume, listaComponenteProdusNou, new ArrayList<>());
+        listaProduse.add(produs);
+        return produs != null ? true : false;
     }
 
     public static void genereazaDateInitiale(){

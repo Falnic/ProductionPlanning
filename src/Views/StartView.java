@@ -14,6 +14,7 @@ public class StartView {
     JPanel[][] panelHolder;
 
     JPanel jPanel;
+    JTextArea textArea;
 
     private JButton adaugaProdusButton;
     private JButton adaugaComponentaButton;
@@ -29,12 +30,9 @@ public class StartView {
         jFrame.setSize(800,800);
 
         GridLayout layout = new GridLayout(6,3);
-        layout.setHgap(10);
-        layout.setVgap(10);
 
         jFrame.setLayout(layout);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
     }
 
     private void initPanelHolder(){
@@ -51,12 +49,11 @@ public class StartView {
 
     private void configureazaStartView(){
 
-        headerJLabel = new JLabel("Tehnici de Planificare a Produc'iei");
+        headerJLabel = new JLabel("Tehnici de Planificare a Productiei");
         panelHolder[0][1].add(headerJLabel);
 
         adaugaProdusButton = new JButton("Adauga Produs");
         adaugaProdusButton.setSize(20, 20);
-//        adaugaProdusButton.setBounds(20, 50, 90, 30);
         panelHolder[1][0].add(adaugaProdusButton);
 
         adaugaComponentaButton = new JButton("Adauga Componenta");
@@ -65,32 +62,26 @@ public class StartView {
         adaugaMasinarieButton = new JButton("Adauga Masinarie");
         panelHolder[1][2].add(adaugaMasinarieButton);
 
-//        jList = new JList();
-//        JScrollPane listScrollPane = new JScrollPane(jList);
 
-        String[] listaStringuri = Main.getNumeComponente().toArray(new String[0]);
-        jList = new JList(listaStringuri);
+        textArea = new JTextArea();
+        textArea.setColumns(20);
+        textArea.setRows(5);
 
-        jList.setSelectedIndex(0);
-        jList.setVisibleRowCount(3);
+        JScrollPane textAreaScrollPane = new JScrollPane(textArea);
+        panelHolder[2][1].add(textAreaScrollPane);
 
-        JScrollPane listScrollPane = new JScrollPane(jList);
-        panelHolder[2][1].add(listScrollPane);
-
-
-        planificaFolosindPSOButton = new JButton("Planifica Folosind PSO");
+        planificaFolosindPSOButton = new JButton("Planifica PSO");
         panelHolder[3][0].add(planificaFolosindPSOButton);
 
-        planificaFolosindBacktrackingButton = new JButton("Planifica Folosind Backtracking");
+        planificaFolosindBacktrackingButton = new JButton("Planifica Backtracking");
         panelHolder[3][2].add(planificaFolosindBacktrackingButton);
 
-        genereazaProduseAleatoareButton = new JButton("Genereaza Produse Aleatoare");
-        genereazaProduseAleatoareButton.setBounds(100, 100, 100, 100);
+        genereazaProduseAleatoareButton = new JButton("Genereaza Produse");
         panelHolder[4][1].add(genereazaProduseAleatoareButton);
 
         genereazaProduseTextField = new JTextField();
+        genereazaProduseTextField.setColumns(13);
         panelHolder[5][1].add(genereazaProduseTextField);
-
 
         jFrame.pack();
         jFrame.setVisible(true);
@@ -108,17 +99,53 @@ public class StartView {
         adaugaProdusButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                new AdaugaProdus();
+            }
+        });
 
-                JFrame jFrame = new JFrame("Tehnici de planificare a productiei");
-                jFrame.setContentPane(new AdaugaProdus().getPanelAdaugaProdus());
-                jFrame.pack();
-                jFrame.setVisible(true);
+
+        adaugaComponentaButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AdaugaComponenta();
+            }
+        });
+        adaugaMasinarieButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AdaugaMasinarie();
+            }
+        });
+        genereazaProduseAleatoareButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int numarProduse = Integer.parseInt(genereazaProduseTextField.getText());
+                    Main.genereazaNumarMareProduse(numarProduse);
+                    textArea.setText(Main.getNumeProduse());
+                } catch (NumberFormatException e1){
+                    e1.printStackTrace();
+                    textArea.setText("Eroare");
+                }
+            }
+        });
+        planificaFolosindPSOButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.setText(Main.getCeaMaiBunaSolutie());
+            }
+        });
+        planificaFolosindBacktrackingButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.setText(Main.getCeaMaiBunaPermutare());
             }
         });
     }
 
     public static void main(String[] args){
         Main.genereazaDateInitiale();
+
         new StartView();
 
     }
